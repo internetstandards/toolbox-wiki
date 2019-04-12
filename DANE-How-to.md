@@ -21,15 +21,13 @@ This part of the How-to describes the steps that should be taken with regard to 
 
 ## Generating DANE records
 **primairy mailserver (mail1.example.com)**
-Generate the DANE SHA-256 hash with `openssl x509 -in /path/to/primairy-mailserver.crt -noout -pubkey | openssl pkey -pubin -outform DER | openssl sha256`. This 
-Output
+Generate the DANE SHA-256 hash with `openssl x509 -in /path/to/primairy-mailserver.crt -noout -pubkey | openssl pkey -pubin -outform DER | openssl sha256`. This command results in the following output. 
 > (stdin)= 29c8601cb562d00aa7190003b5c17e61a93dcbed3f61fd2f86bd35fbb461d084
 
 **secundairy mailserver (mail2.example.com)**
-Command
-`openssl x509 -in /path/to/secundairy-mailserver.crt -noout -pubkey | openssl pkey -pubin -outform DER | openssl sha256`
-Output
-`(stdin)= 22c635348256dc53a2ba6efe56abfbe2f0ae70be2238a53472fef5064d9cf437`
+For the secundairy mailserver we generate the DANE SHA-256 hash using 
+`openssl x509 -in /path/to/secundairy-mailserver.crt -noout -pubkey | openssl pkey -pubin -outform DER | openssl sha256`. This command results in the following output. 
+> (stdin)= 22c635348256dc53a2ba6efe56abfbe2f0ae70be2238a53472fef5064d9cf437
 
 ## Publishing DANE records
 Configuration options

@@ -13,7 +13,7 @@ This part of the How-to describes the steps that should be taken with regard to 
 * SpamAssassin version 3.4.2 (running on Perl version 5.24.1)
 * Postfix 3.1.8
 * BIND 9.10.3-P4-Debian
-* Two certficates for two mailservers were purchased from Comodo/Sectigo
+* Two certficates (for two mailservers) were purchased from Comodo/Sectigo
 
 **Assumptions**
 * DNSSEC is used
@@ -39,6 +39,7 @@ Configuration options
 * Matching-type is "1" because we use SHA-256.
 
 With this information we can create a DNS record for DANE:
+
 `_25._tcp.mail.example.com. IN TLSA 3 1 1 29c8601cb562d00aa7190003b5c17e61a93dcbed3f61fd2f86bd35fbb461d084`
 `_25._tcp.mail2.example.com. IN TLSA 3 1 1 22c635348256dc53a2ba6efe56abfbe2f0ae70be2238a53472fef5064d9cf437`
 

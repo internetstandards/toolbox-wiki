@@ -75,11 +75,18 @@ With this information we can create a rollover DNS record for DANE:
 # Implementing DANE for inbound e-mail traffic
 
 ## Configuring Postfix
-Postfix plays an important role in using DANE when available.
+Postfix plays an important role in using DANE for validating the when available.
 
 Make sure the following entries are present in **/etc/postfix/main.cf**
 > smtp_dns_support_level = dnssec  
+
+This setting tells Postfix to perform DNS lookups using DNSSEC. This is an important prerequisite for DANE to be effective, since regular DNS lookups can be manipulated.  
+
 > smtp_tls_security_level = dane  
+
+The "dane" level is a stronger form of opportunistic TLS that is resistant to man in the middle and downgrade attacks when the destination domain uses DNSSEC to publish DANE TLSA records for its MX hosts. If a remote SMTP server has "usable" (see section 3 of RFC 7672) DANE TLSA records, the server connection will be authenticated. When DANE authentication fails, there is no fallback to unauthenticated or plaintext delivery. 
+The Postfix SMTP client supports only certificate usages "2" and "3".
+
 > smtp_host_lookup = dns  
 > smtp_tls_note_starttls_offer = yes  
 > smtpd_tls_CAfile = /path/to/ca-bundle-file.crt  

@@ -39,7 +39,7 @@ Now that we have the SHA-256 hashes, we can construct the DNS records. We make t
 
 With this information we can create the DNS record for DANE:
 
-> _25._tcp.mail.example.com. IN TLSA 3 1 1 29c8601cb562d00aa7190003b5c17e61a93dcbed3f61fd2f86bd35fbb461d084
+> _25._tcp.mail.example.com. IN TLSA 3 1 1 29c8601cb562d00aa7190003b5c17e61a93dcbed3f61fd2f86bd35fbb461d084  
 > _25._tcp.mail2.example.com. IN TLSA 3 1 1 22c635348256dc53a2ba6efe56abfbe2f0ae70be2238a53472fef5064d9cf437
 
 ## Generating DANE roll-over records
@@ -47,13 +47,11 @@ We use the provided bundle file for generating the DANE hashes belonging to the 
 
 For each file we view the **subject** and the **issuer**. We start with the first file using `openssl x509 -in bundlecert.1.crt -noout -subject -issuer`. This results in the following output.
 
-> subject=C = GB, ST = Greater Manchester, L = Salford, O = Sectigo Limited, CN = Sectigo RSA Domain Validation Secure Server CA
-
+> subject=C = GB, ST = Greater Manchester, L = Salford, O = Sectigo Limited, CN = Sectigo RSA Domain Validation Secure Server CA  
 > issuer=C = US, ST = New Jersey, L = Jersey City, O = The USERTRUST Network, CN = USERTrust RSA Certification Authority
 
 For the second file we use `openssl x509 -in bundlecert.2.crt -noout -subject -issuer`. This results in the following output.
-> subject=C = US, ST = New Jersey, L = Jersey City, O = The USERTRUST Network, CN = USERTrust RSA Certification Authority
-
+> subject=C = US, ST = New Jersey, L = Jersey City, O = The USERTRUST Network, CN = USERTrust RSA Certification Authority  
 > issuer=C = US, ST = New Jersey, L = Jersey City, O = The USERTRUST Network, CN = USERTrust RSA Certification Authority
 
 Based on the information of these two certificates, we can conclude that the second certificate (bundlecert.2.crt) is the root certificate; since root certificates are self-signed the **subject** and the **issuer** are the same. The other certificate (bundlecert.1.crt) is an intermediate certificate which is (in this case) signed by the root certificate. 
@@ -71,10 +69,17 @@ Now that we have the SHA-256 hash, we can construct the DANE roll-over DNS recor
 * Matching-type field is "**1**"; because we use SHA-256.
 
 With this information we can create a rollover DNS record for DANE:
-> _25._tcp.mail.example.com. IN TLSA 2 1 1 c784333d20bcd742b9fdc3236f4e509b8937070e73067e254dd3bf9c45bf4dde
+> _25._tcp.mail.example.com. IN TLSA 2 1 1 c784333d20bcd742b9fdc3236f4e509b8937070e73067e254dd3bf9c45bf4dde  
 > _25._tcp.mail2.example.com. IN TLSA 2 1 1 c784333d20bcd742b9fdc3236f4e509b8937070e73067e254dd3bf9c45bf4dde
 
-
-## Configuring mailserver
-
 # Implementing DANE for inbound e-mail traffic
+
+## Configuring Postfix
+Postfix plays an important role in using DANE when available.
+
+Make sure the following entries are present in **/etc/postfix/main.cf**
+> smtp_dns_support_level = dnssec  
+> smtp_tls_security_level = dane  
+> smtp_host_lookup = dns  
+> smtp_tls_note_starttls_offer = yes  
+> smtpd_tls_CAfile = /path/to/ca-bundle-file.crt  

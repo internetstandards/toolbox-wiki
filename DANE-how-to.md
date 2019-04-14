@@ -9,26 +9,26 @@ This part of the How-to describes the steps that should be taken with regard to 
 
 ## Debian Stretch
 **Specifics for this setup**
-* Linux Debian 9.7 (Stretch) 
-* SpamAssassin version 3.4.2 (running on Perl version 5.24.1)
-* Postfix 3.1.8
+* Linux Debian 9.8 (Stretch) 
+* SpamAssassin version 3.4.2 (running on Perl version 5.28.1)
+* Postfix 3.4.5
 * BIND 9.10.3-P4-Debian
-* Two certficates (for two mailservers) were purchased from Comodo/Sectigo
+* Two certificates (for two mail servers) from Comodo / Sectigo
 
 **Assumptions**
 * DNSSEC is used
-* Mailserver is operational
+* Mail server is operational
 
 ## Generating DANE records
-**Primairy mailserver (mail1.example.com)**
+**Primary mail server (mail1.example.com)**
 
-Generate the DANE SHA-256 hash with `openssl x509 -in /path/to/primairy-mailserver.crt -noout -pubkey | openssl pkey -pubin -outform DER | openssl sha256`. This command results in the following output. 
+Generate the DANE SHA-256 hash with `openssl x509 -in /path/to/primary-mailserver.crt -noout -pubkey | openssl pkey -pubin -outform DER | openssl sha256`. This command results in the following output. 
 > (stdin)= 29c8601cb562d00aa7190003b5c17e61a93dcbed3f61fd2f86bd35fbb461d084
 
-**Secundairy mailserver (mail2.example.com)**
+**Secondary mail server (mail2.example.com)**
 
-For the secundairy mailserver we generate the DANE SHA-256 hash using 
-`openssl x509 -in /path/to/secundairy-mailserver.crt -noout -pubkey | openssl pkey -pubin -outform DER | openssl sha256`. This command results in the following output. 
+For the secondary mail server we generate the DANE SHA-256 hash using 
+`openssl x509 -in /path/to/secondary-mailserver.crt -noout -pubkey | openssl pkey -pubin -outform DER | openssl sha256`. This command results in the following output. 
 > (stdin)= 22c635348256dc53a2ba6efe56abfbe2f0ae70be2238a53472fef5064d9cf437
 
 ## Publishing DANE records
@@ -80,13 +80,16 @@ Postfix plays an important role in using DANE for validating the when available.
 Make sure the following entries are present in **/etc/postfix/main.cf**
 > smtp_dns_support_level = dnssec  
 
-This setting tells Postfix to perform DNS lookups using DNSSEC. This is an important prerequisite for DANE to be effective, since regular DNS lookups can be manipulated.  
+This setting tells Postfix to perform DNS lookups using DNSSEC. This is an important prerequisite for DANE to be effective, since regular DNS lookups can be manipulated. Without DNSSEC support, Postfix cannot use DANE.
 
 > smtp_tls_security_level = dane  
 
-The "dane" level is a stronger form of opportunistic TLS that is resistant to man in the middle and downgrade attacks when the destination domain uses DNSSEC to publish DANE TLSA records for its MX hosts. If a remote SMTP server has "usable" (see section 3 of RFC 7672) DANE TLSA records, the server connection will be authenticated. When DANE authentication fails, there is no fallback to unauthenticated or plaintext delivery. 
-The Postfix SMTP client supports only certificate usages "2" and "3".
+By default Postfix uses opportunistic TLS (smtp_tls_security_level = may) which is susceptible to man in the middle attacks. You could tell Postfix to use mandatory TLS (smtp_tls_security_level = encrypt) but this breaks backwards compatibility with mail servers that don't support TLS (and only work with plaintext delivery). However, when Postfix is configured to use the "dane" security level (smtp_tls_security_level = dane) it becomes resistant to man in the middle attacks, since Postfix will connect to other mail servers using "mandatory TLS" when TLSA records are found. If TLSA records are found but are unusable, Postfix won't fallback to plaintext or unauthenticated delivery. 
 
 > smtp_host_lookup = dns  
-> smtp_tls_note_starttls_offer = yes  
+
+This tells Postfix to perform lookups using DNS. Although this is default behavior it is important to make sure this is configured, since DANE won't be enabled if lookups are performed using a different mechanism.
+
 > smtpd_tls_CAfile = /path/to/ca-bundle-file.crt  
+
+When applying a DANE roll-over scheme using an "issuer certificate" (an intermediate or root certificate), Postfix must be able to provide the certificates of the used issuer in the chain of trust. Hence this setting.

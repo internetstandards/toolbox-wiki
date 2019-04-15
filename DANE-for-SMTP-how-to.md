@@ -122,3 +122,6 @@ This tells Postfix to perform lookups using DNS. Although this is default behavi
 > smtpd_tls_CAfile = /path/to/ca-bundle-file.crt  
 
 When applying a DANE roll-over scheme using an "issuer certificate" (an intermediate or root certificate), Postfix must be able to provide the certificates of the used issuer in the chain of trust. Hence this setting.
+
+# Used and interesting sources
+to-do

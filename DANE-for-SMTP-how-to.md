@@ -17,8 +17,21 @@ DANE addresses these shortcomings because:
 
 # Guaranteeing a valid TLSA record
 Because it is important that there is always a valid TLSA record to make sure mail transport can occur, DANE offers a roll-over mechanism. A roll-over is useful when certificates expire and need to be replaced. Since distributing information via DNS can be a bit slow (depending on the TTL settings), it's important to anticipate a certificate change from a DANE perspective. This can be done by applying a roll-over scheme of which there are two:
-* current + next. 
-* current + issuer
+* Current + next. This roll-over scheme provides two TLSA records per mail server. One with the fingerprint of the current mail server's certificate (usage type 3), and another with the fingerprint of the future mail server's certificate (usage type 3). The latter can, for example, be determined by using a Certificate Signing Request (CSR).
+* Current + issuer. This roll-over scheme provides two TLSA records per mail server. One with the fingerprint of the current mail server's certificate (usage type 3), and another with the fingerprint of a certificate within the current mail server's certificate chain of trust; an intermediate or root certificate. 
+
+# Tips and tricks for implementation
+This section describes several pionts for attention when implementing DANE for SMTP. 
+
+* Purchasing of expensive certificates for mail server has no to little added value for the confidentiality since mail server don't validate certificates by default. Depending on the context there can be other advantages which makes organizations decide to use specific certificates.
+* It is recommended to use a certificates public key for generating a TLSA signature (selector type "1") instead of the full certificate (selector type "0"), because this enables the reuse of key materials. Notice that the use of Forward Secrecy decreases the need to use a new key-pair on every occasion. 
+* An issuer certificate (usage type "2") validates only when the full certificate chain is offered by the receiving mail server. 
+* Mail servers don't validate certificates and therefore don't have their own certificate store. That's why DANE for SMTP only supports usage type "2" (DANE-TA) and usage type "3" (DANE-EE). Usage type "0" (PKIX-TA) and usage type "1" (PKIX-EE) are not supported. 
+* Make sure the TTL (time-to-live) of your TLSA records is not too high. This makes it possible to apply changes relatively fast in case of problems. A TTL between 30 minutes (1800) and 1 hour (3600) is recommended.
+* The refresh value of your full DNS zone should be in accordance with the TTL setting of your TLSA record, to make sure all name servers give the same information when (after expiration of the TLSA TTL) being queried.
+* In case of roll-over scheme "current + issuer", the use of the root certificate is preferred because in some contexts ([PKIoverheid](https://en.wikipedia.org/wiki/PKIoverheid)) this makes it easier to switch supplier / certficate without impacting DANE. (Remember [DigiNotar](https://en.wikipedia.org/wiki/DigiNotar)). 
+* Roll-over scheme "current + next" gives less flexibility but the highest form of certainty, because of "tight pinning".
+* Implement monitoring of your DANE records to be able to detect problems as soon as possible. 
 
 # Implementing DANE for SMTP on Debian Stretch
 **Specifics for this setup**

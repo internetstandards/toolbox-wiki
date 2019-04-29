@@ -10,7 +10,7 @@ Our current e-mail infrastructure was originally designed for any mail sending h
 # Tips and tricks for implementation
 to-do
 
-# Implementing DANE for SMTP on Debian Stretch
+# Implementing SPF on Debian Stretch
 **Specifics for this setup**
 * Linux Debian 9.8 (Stretch) 
 * SpamAssassin version 3.4.2 (running on Perl version 5.28.1)

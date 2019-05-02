@@ -33,7 +33,7 @@ This section describes several pionts for attention when implementing DANE for S
 * Roll-over scheme "current + next" gives less flexibility but the highest form of certainty, because of "tight pinning".
 * Implement monitoring of your DANE records to be able to detect problems as soon as possible. 
 
-# Implementing DANE for SMTP on Debian Stretch
+# Implementing DANE for SMTP for Postfix
 **Specifics for this setup**
 * Linux Debian 9.8 (Stretch) 
 * SpamAssassin version 3.4.2 (running on Perl version 5.28.1)
@@ -101,7 +101,7 @@ With this information we can create a rollover DNS record for DANE:
 > _25._tcp.mail.example.com. IN TLSA 2 1 1 c784333d20bcd742b9fdc3236f4e509b8937070e73067e254dd3bf9c45bf4dde  
 > _25._tcp.mail2.example.com. IN TLSA 2 1 1 c784333d20bcd742b9fdc3236f4e509b8937070e73067e254dd3bf9c45bf4dde
 
-## Implementing DANE for inbound e-mail traffic
+## Inbound e-mail traffic
 
 ### Configuring Postfix
 Postfix plays an important role in using DANE for validating the when available.
@@ -122,6 +122,41 @@ This tells Postfix to perform lookups using DNS. Although this is default behavi
 > smtpd_tls_CAfile = /path/to/ca-bundle-file.crt  
 
 When applying a DANE roll-over scheme using an "issuer certificate" (an intermediate or root certificate), Postfix must be able to provide the certificates of the used issuer in the chain of trust. Hence this setting.
+
+# Additional information for implementing DANE for SMTP on Exim
+**Specifics for this setup**
+* Linux Debian Buster (testing) 
+* Exim 4.91 
+
+**Assumptions**
+* DNSSEC is used
+* Mail server is operational
+
+## Inbound and outbound e-mail traffic
+This part of the how to describes some generic steps that should be taken with regard to both inbound and outbound e-mail traffic.
+
+### Install or generate key pair
+You can use a commercial or Let's Encrypt certificate, but you can also generate your own key pair by using the provided Exim tools. Use `sudo bash /usr/share/doc/exim4-base/examples/exim-gencert` to generate a key pair.
+
+### Configure TLS 
+In Exim you should configure TLS by adding the following to **main/03_exim4-config_tlsoptions**
+
+    MAIN_TLS_ENABLE = yes
+    tls_advertise_hosts = *
+    tls_certificate = /path/to/certificate.crt
+    tls_privatekey = /path/to/private.key
+
+## Outbound e-mail traffic
+This part of the how to describes the steps that should be taken with regard to your outbound e-mail traffic. This enables other parties to use DANE for validating the certificates offered by your e-mail servers. 
+
+### DNSSEC validating resolvers
+Make sure to configure DNSSEC validating resolvers on the mail server. When using the locale systemd resolver, make sure to add `DNSSEC = yes` to **/etc/systemd/resolved.conf**.
+
+### Configure DNSSEC validation in Exim
+In Exim you explicitly need to configure DNSSEC validation by adding `dns_dnssec_ok = 1` to **main/02_exim4-config_options** since some resolvers only validate DNSSEC on request. 
+
+### Configure DANE
+In order to use DANE, you should tell Exim to check for DANE records when sending e-mail. You can configure DANE validation to be mandatory by adding `hosts_require_dane = *` to **transport/30_exim4-config_remote_smtp**. This means that TLS connections are not accepted when the domain you are trying to send mail to does not have a valid TLSA record. Since this is rather strict and not recommended to be the default, you are probably better of by configuring DANE validation to be additional. This can be done by adding `hosts_try_dane = *` to **transport/30_exim4-config_remote_smtp**.
 
 # Used and interesting sources
 to-do

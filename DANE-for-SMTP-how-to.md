@@ -32,6 +32,7 @@ This section describes several pionts for attention when implementing DANE for S
 * In case of roll-over scheme "current + issuer", the use of the root certificate is preferred because in some contexts ([PKIoverheid](https://en.wikipedia.org/wiki/PKIoverheid)) this makes it easier to switch supplier / certficate without impacting DANE. (Remember [DigiNotar](https://en.wikipedia.org/wiki/DigiNotar)). 
 * Roll-over scheme "current + next" gives less flexibility but the highest form of certainty, because of "tight pinning".
 * Implement monitoring of your DANE records to be able to detect problems as soon as possible. 
+* Don't use a CNAME in your MX record. This will break DANE since CNAME in MX records are not allowed according to [RFC 2181 section 10.3](https://tools.ietf.org/html/rfc2181#section-10.3).
 
 # Implementing DANE for SMTP for Postfix
 **Specifics for this setup**
@@ -51,13 +52,21 @@ This part of the how to describes the steps that should be taken with regard to 
 ### Generating DANE records
 **Primary mail server (mail1.example.com)**
 
-Generate the DANE SHA-256 hash with `openssl x509 -in /path/to/primary-mailserver.crt -noout -pubkey | openssl pkey -pubin -outform DER | openssl sha256`. This command results in the following output. 
+Generate the DANE SHA-256 hash with the following command:
+
+`openssl x509 -in /path/to/primary-mailserver.crt -noout -pubkey | openssl pkey -pubin -outform DER | openssl sha256`
+
+This command results in the following output:
+ 
 > (stdin)= 29c8601cb562d00aa7190003b5c17e61a93dcbed3f61fd2f86bd35fbb461d084
 
 **Secondary mail server (mail2.example.com)**
 
-For the secondary mail server we generate the DANE SHA-256 hash using 
-`openssl x509 -in /path/to/secondary-mailserver.crt -noout -pubkey | openssl pkey -pubin -outform DER | openssl sha256`. This command results in the following output. 
+For the secondary mail server we generate the DANE SHA-256 hash using the command:
+
+`openssl x509 -in /path/to/secondary-mailserver.crt -noout -pubkey | openssl pkey -pubin -outform DER | openssl sha256`
+
+This command results in the following output: 
 > (stdin)= 22c635348256dc53a2ba6efe56abfbe2f0ae70be2238a53472fef5064d9cf437
 
 ### Publishing DANE records
@@ -74,19 +83,31 @@ With this information we can create the DNS record for DANE:
 ### Generating DANE roll-over records
 We use the provided bundle file for generating the DANE hashes belonging to the root certificate. In order to do that, we first split the bundle file into multiple certificates using `cat ca-bundle-file.crt | awk 'BEGIN {c=0;} /BEGIN CERT/{c++} { print > "bundlecert." c ".crt"}'`. In this specific case this results in two files: _bundlecert.1.crt_ and _bundlecert.2.crt_.
 
-For each file we view the **subject** and the **issuer**. We start with the first file using `openssl x509 -in bundlecert.1.crt -noout -subject -issuer`. This results in the following output.
+For each file we view the **subject** and the **issuer**. We start with the first file using the following command:
+
+`openssl x509 -in bundlecert.1.crt -noout -subject -issuer`
+
+This results in the following output:
 
 > subject=C = GB, ST = Greater Manchester, L = Salford, O = Sectigo Limited, CN = Sectigo RSA Domain Validation Secure Server CA  
 > issuer=C = US, ST = New Jersey, L = Jersey City, O = The USERTRUST Network, CN = USERTrust RSA Certification Authority
 
-For the second file we use `openssl x509 -in bundlecert.2.crt -noout -subject -issuer`. This results in the following output.
+For the second file we use the command:
+
+`openssl x509 -in bundlecert.2.crt -noout -subject -issuer`
+
+This results in the following output:
 > subject=C = US, ST = New Jersey, L = Jersey City, O = The USERTRUST Network, CN = USERTrust RSA Certification Authority  
 > issuer=C = US, ST = New Jersey, L = Jersey City, O = The USERTRUST Network, CN = USERTrust RSA Certification Authority
 
 Based on the information of these two certificates, we can conclude that the second certificate (bundlecert.2.crt) is the root certificate; since root certificates are self-signed the **subject** and the **issuer** are the same. The other certificate (bundlecert.1.crt) is an intermediate certificate which is (in this case) signed by the root certificate. 
 
 ### Publishing DANE roll-over records
-Because we prefer the root certificate to be our roll-over anchor, we generate the DANE SHA-256 hash using `openssl x509 -in bundlecert.2.crt -noout -pubkey | openssl pkey -pubin -outform DER | openssl sha256`. This results in the following output.
+Because we prefer the root certificate to be our roll-over anchor, we generate the DANE SHA-256 hash using the command:
+
+`openssl x509 -in bundlecert.2.crt -noout -pubkey | openssl pkey -pubin -outform DER | openssl sha256`
+
+This results in the following output:
 
 > (stdin)= c784333d20bcd742b9fdc3236f4e509b8937070e73067e254dd3bf9c45bf4dde
 
@@ -107,6 +128,7 @@ With this information we can create a rollover DNS record for DANE:
 Postfix plays an important role in using DANE for validating the when available.
 
 Make sure the following entries are present in **/etc/postfix/main.cf**
+
 > smtp_dns_support_level = dnssec  
 
 This setting tells Postfix to perform DNS lookups using DNSSEC. This is an important prerequisite for DANE to be effective, since regular DNS lookups can be manipulated. Without DNSSEC support, Postfix cannot use DANE.
@@ -125,8 +147,8 @@ When applying a DANE roll-over scheme using an "issuer certificate" (an intermed
 
 # Additional information for implementing DANE for SMTP on Exim
 **Specifics for this setup**
-* Linux Debian Buster (testing) 
-* Exim 4.91 
+* Ubuntu 18.10 ‘Cosmic Cuttlefish’ 
+* Exim 4.92 (DANE support is non-experimental since version 4.91)
 
 **Assumptions**
 * DNSSEC is used
@@ -136,7 +158,9 @@ When applying a DANE roll-over scheme using an "issuer certificate" (an intermed
 This part of the how to describes some generic steps that should be taken with regard to both inbound and outbound e-mail traffic.
 
 ### Install or generate key pair
-You can use a commercial or Let's Encrypt certificate, but you can also generate your own key pair by using the provided Exim tools. Use `sudo bash /usr/share/doc/exim4-base/examples/exim-gencert` to generate a key pair.
+You can use a commercial or Let's Encrypt certificate, but you can also generate your own key pair by using the provided Exim tools. Use the following command to generate a key pair.
+
+`sudo bash /usr/share/doc/exim4-base/examples/exim-gencert`
 
 ### Configure TLS 
 In Exim you should configure TLS by adding the following to **main/03_exim4-config_tlsoptions**
@@ -150,13 +174,25 @@ In Exim you should configure TLS by adding the following to **main/03_exim4-conf
 This part of the how to describes the steps that should be taken with regard to your outbound e-mail traffic. This enables other parties to use DANE for validating the certificates offered by your e-mail servers. 
 
 ### DNSSEC validating resolvers
-Make sure to configure DNSSEC validating resolvers on the mail server. When using the locale systemd resolver, make sure to add `DNSSEC = yes` to **/etc/systemd/resolved.conf**.
+Make sure to configure DNSSEC validating resolvers on the mail server. When using the locale systemd resolver, make sure to add the following to **/etc/systemd/resolved.conf**.
+
+`DNSSEC = yes`
 
 ### Configure DNSSEC validation in Exim
-In Exim you explicitly need to configure DNSSEC validation by adding `dns_dnssec_ok = 1` to **main/02_exim4-config_options** since some resolvers only validate DNSSEC on request. 
+In Exim you explicitly need to configure DNSSEC validation by adding the following to **main/02_exim4-config_options** since some resolvers only validate DNSSEC on request. 
+
+`dns_dnssec_ok = 1`
 
 ### Configure DANE
-In order to use DANE, you should tell Exim to check for DANE records when sending e-mail. You can configure DANE validation to be mandatory by adding `hosts_require_dane = *` to **transport/30_exim4-config_remote_smtp**. This means that TLS connections are not accepted when the domain you are trying to send mail to does not have a valid TLSA record. Since this is rather strict and not recommended to be the default, you are probably better of by configuring DANE validation to be additional. This can be done by adding `hosts_try_dane = *` to **transport/30_exim4-config_remote_smtp**.
+In order to use DANE, you should tell Exim to check for DANE records when sending e-mail. You can configure DANE validation to be mandatory by adding the following to **transport/30_exim4-config_remote_smtp**. 
+
+`hosts_require_dane = *`
+
+This means that TLS connections are not accepted when the domain you are trying to send mail to does not have a valid TLSA record. Since this is rather strict and not recommended to be the default, you are probably better of by configuring DANE validation to be additional. This can be done by adding the following to **transport/30_exim4-config_remote_smtp**.
+
+`hosts_try_dane = *`
+
+Notice that depending on the way you configured Exim, you need to apply DANE for all [SMTP transports](https://www.exim.org/exim-html-current/doc/html/spec_html/ch-how_exim_receives_and_delivers_mail.html#SECTprocaddress).
 
 # Used and interesting sources
 to-do

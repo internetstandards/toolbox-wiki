@@ -12,7 +12,7 @@ Our current e-mail infrastructure was originally designed for any mail sending h
 * E-mail forwarding is not supported, since the e-mail is often forwarded by another e-mail server.
 * SPF does not work between domains that use the same e-mail server.
 
-# DNS records (outbound e-mail traffic)
+# Outbound e-mail traffic (DNS records)
 SPF for outbound e-mail traffic is limited to publishing an SPF policy as a TXT-record in a domain name's DNS zone. This enables other parties to use SPF for validating the authenticity of e-mail servers sending e-mail on behalf of your domain name. 
 
 The example below shows an SPF record with a **hard fail**.

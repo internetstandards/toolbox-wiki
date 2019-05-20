@@ -9,6 +9,8 @@ Our current e-mail infrastructure was originally designed for any mail sending h
 
 # Tips and tricks for implementation
 * The sender address shown to the user ("5322.From header") is not used when authenticating. SPF uses the invisible "5321.From header". Combining SPF with DMARC removes this disadvantage. 
+* E-mail forwarding is not supported, since the e-mail is often forwarded by another e-mail server.
+* SPF does not work between domains that use the same e-mail server.
 
 # DNS records (outbound e-mail traffic)
 SPF for outbound e-mail traffic is limited to publishing an SPF policy as a TXT-record in a domain name's DNS zone. This enables other parties to use SPF for validating the authenticity of e-mail servers sending e-mail on behalf of your domain name. 

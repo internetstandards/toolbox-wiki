@@ -20,7 +20,7 @@ Because it is important that there is always a valid TLSA record to make sure ma
 * Current + next. This roll-over scheme provides two TLSA records per mail server. One with the fingerprint of the current mail server's certificate (usage type 3), and another with the fingerprint of the future mail server's certificate (usage type 3). The latter can, for example, be determined by using a Certificate Signing Request (CSR).
 * Current + issuer. This roll-over scheme provides two TLSA records per mail server. One with the fingerprint of the current mail server's certificate (usage type 3), and another with the fingerprint of a certificate within the current mail server's certificate chain of trust; an intermediate or root certificate. 
 
-# Tips and tricks for implementation
+# Tips, tricks and notices for implementation
 This section describes several pionts for attention when implementing DANE for SMTP. 
 
 * Purchasing of expensive certificates for mail server has no to little added value for the confidentiality since mail server don't validate certificates by default. Depending on the context there can be other advantages which makes organizations decide to use specific certificates.

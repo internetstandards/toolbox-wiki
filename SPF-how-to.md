@@ -10,7 +10,12 @@ Our current e-mail infrastructure was originally designed for any mail sending h
 # Tips and tricks for implementation
 to-do
 
-# Implementing SPF on Debian Stretch
+# DNS records (outbound e-mail traffic)
+SPF for outbound e-mail traffic is limited to setting an SPF record in DNS. This enables other parties to use SPF for validating the authenticity of e-mail servers sending e-mail on behalf of your domain name. 
+
+# Inbound e-mail traffic 
+
+## Implementing SPF on Debian Stretch
 **Specifics for this setup**
 * Linux Debian 9.8 (Stretch) 
 * SpamAssassin version 3.4.2 (running on Perl version 5.28.1)
@@ -23,6 +28,4 @@ to-do
 * Mail server is operational
 
 ## Outbound e-mail traffic
-This part of the how to describes the steps that should be taken with regard to your outbound e-mail traffic. This enables other parties to use SPF for validating the authenticity of e-mail servers sending e-mail on behalf of your domain name. 
 
-### Generating and publishing SPF records

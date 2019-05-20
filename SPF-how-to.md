@@ -7,7 +7,7 @@ SPF is short for "**S**ender **P**olicy **F**ramework" and is described in [RFC 
 # Why use SPF?
 Our current e-mail infrastructure was originally designed for any mail sending host to use any DNS domain name it wants. The authenticity of the sending mail server cannot be deterimined, which makes it easy for random third parties to make use of a domain name with possibly a malicious intent. This increases the risk of processing e-mail since the intentions of the sender (host) are uncertain. SPF can help the fight against spam and other kinds of unwanted e-mail be offering a way of authenticating the sending mail server.  
 
-# Tips and tricks for implementation
+# Tips, tricks and notices for implementation
 * The sender address shown to the user ("5322.From header") is not used when authenticating. SPF uses the invisible "5321.From header". Combining SPF with DMARC removes this disadvantage. 
 * E-mail forwarding is not supported, since the e-mail is often forwarded by another e-mail server.
 * SPF does not work between domains that use the same e-mail server.

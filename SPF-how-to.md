@@ -11,7 +11,12 @@ Our current e-mail infrastructure was originally designed for any mail sending h
 to-do
 
 # DNS records (outbound e-mail traffic)
-SPF for outbound e-mail traffic is limited to setting an SPF record in DNS. This enables other parties to use SPF for validating the authenticity of e-mail servers sending e-mail on behalf of your domain name. 
+SPF for outbound e-mail traffic is limited to publishing an SPF policy as a TXT-record in a domain name's DNS zone. This enables other parties to use SPF for validating the authenticity of e-mail servers sending e-mail on behalf of your domain name. 
+
+The example below shows an SPF record with a **hard fail**.
+> v=spf1 mx ip4:192.168.1.1/32 ip6:fd12:3456:789a:1::/64 a:mail.example.com a:mail2.example.com -all"
+
+Although a soft fail (~all) is recommended in order to prevent false positives.
 
 # Inbound e-mail traffic 
 
@@ -27,5 +32,4 @@ SPF for outbound e-mail traffic is limited to setting an SPF record in DNS. This
 * DNSSEC is used
 * Mail server is operational
 
-## Outbound e-mail traffic
 

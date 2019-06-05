@@ -1,3 +1,26 @@
+# Table of contents
+- [Introduction](#introduction)
+- [What is DANE?](#what-is-dane-)
+- [Why use DANE for SMTP?](#why-use-dane-for-smtp-)
+- [Guaranteeing a valid TLSA record](#guaranteeing-a-valid-tlsa-record)
+- [Tips, tricks and notices for implementation](#tips--tricks-and-notices-for-implementation)
+- [Outbound e-mail traffic (DNS records)](#outbound-e-mail-traffic--dns-records-)
+  * [Generating DANE records](#generating-dane-records)
+  * [Publishing DANE records](#publishing-dane-records)
+  * [Generating DANE roll-over records](#generating-dane-roll-over-records)
+  * [Publishing DANE roll-over records](#publishing-dane-roll-over-records)
+- [Inbound e-mail traffic](#inbound-e-mail-traffic)
+  * [Implementing DANE for SMTP on Postfix](#implementing-dane-for-smtp-on-postfix)
+    + [Configuring Postfix](#configuring-postfix)
+  * [Additional information for implementing DANE for SMTP on Exim](#additional-information-for-implementing-dane-for-smtp-on-exim)
+    + [Inbound and outbound e-mail traffic](#inbound-and-outbound-e-mail-traffic)
+      - [Install or generate key pair](#install-or-generate-key-pair)
+      - [Configure TLS](#configure-tls)
+    + [Outbound e-mail traffic](#outbound-e-mail-traffic)
+      - [DNSSEC validating resolvers](#dnssec-validating-resolvers)
+      - [Configure DNSSEC validation in Exim](#configure-dnssec-validation-in-exim)
+      - [Configure DANE](#configure-dane)
+
 # Introduction
 This how to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DANE for SMTP.  
 
@@ -112,7 +135,7 @@ With this information we can create a rollover DNS record for DANE:
 
 # Inbound e-mail traffic
 
-## Implementing DANE for SMTP for Postfix
+## Implementing DANE for SMTP on Postfix
 **Specifics for this setup**
 * Linux Debian 9.8 (Stretch) 
 * SpamAssassin version 3.4.2 (running on Perl version 5.28.1)

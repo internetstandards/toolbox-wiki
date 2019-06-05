@@ -23,3 +23,8 @@ Signing in Postfix
 * Postfix 3.4.5
 * BIND 9.10.3-P4-Debian
 * OpenDKIM v2.11.0
+
+**Assumptions**
+* DNSSEC is used
+* Mail server is operational
+* Software packages are already installed

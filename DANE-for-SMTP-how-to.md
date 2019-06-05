@@ -129,19 +129,19 @@ Postfix plays an important role in using DANE for validating the when available.
 
 Make sure the following entries are present in **/etc/postfix/main.cf**
 
-> smtp_dns_support_level = dnssec  
+`smtp_dns_support_level = dnssec`  
 
 This setting tells Postfix to perform DNS lookups using DNSSEC. This is an important prerequisite for DANE to be effective, since regular DNS lookups can be manipulated. Without DNSSEC support, Postfix cannot use DANE.
 
-> smtp_tls_security_level = dane  
+`smtp_tls_security_level = dane`  
 
 By default Postfix uses opportunistic TLS (smtp_tls_security_level = may) which is susceptible to man in the middle attacks. You could tell Postfix to use mandatory TLS (smtp_tls_security_level = encrypt) but this breaks backwards compatibility with mail servers that don't support TLS (and only work with plaintext delivery). However, when Postfix is configured to use the "dane" security level (smtp_tls_security_level = dane) it becomes resistant to man in the middle attacks, since Postfix will connect to other mail servers using "mandatory TLS" when TLSA records are found. If TLSA records are found but are unusable, Postfix won't fallback to plaintext or unauthenticated delivery. 
 
-> smtp_host_lookup = dns  
+`smtp_host_lookup = dns`  
 
 This tells Postfix to perform lookups using DNS. Although this is default behavior it is important to make sure this is configured, since DANE won't be enabled if lookups are performed using a different mechanism.
 
-> smtpd_tls_CAfile = /path/to/ca-bundle-file.crt  
+`smtpd_tls_CAfile = /path/to/ca-bundle-file.crt`  
 
 When applying a DANE roll-over scheme using an "issuer certificate" (an intermediate or root certificate), Postfix must be able to provide the certificates of the used issuer in the chain of trust. Hence this setting.
 

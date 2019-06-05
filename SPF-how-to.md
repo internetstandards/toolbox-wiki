@@ -41,21 +41,21 @@ The [Postfix SMTP server](http://www.postfix.org/smtpd.8.html) seems to be proce
 
 The follow table provides a schematic overview of an SMTP conversation and relates specific stages to Postfix' access restriction lists. 
 
-| Part of the SMTP conversation | Associated access restriction list  | Comments
+| Part of the SMTP conversation | Associated Postfix access restriction list  | Comments
 | ---  | --- | --- |
 | Connected to 192.168.1.1 (192.168.1.1). | | |
 | Escape character is '^]'. | | |
 | 220 mail.example.com ESMTP Postfix | [smtpd_client_restrictions](http://www.postfix.org/postconf.5.html#smtpd_client_restrictions) | |
 | HELO mail.example.com | [smtpd_helo_restrictions](http://www.postfix.org/postconf.5.html#smtpd_helo_restrictions) | |
 | 250 mail.example.com | | |
-| MAIL FROM:<sender@example.com> | [smtpd_sender_restrictions](http://www.postfix.org/postconf.5.html#smtpd_sender_restrictions) | RFC5321.MailFrom, Return-Path, Envelope sender, Envelope from --> used by **SPF** |
+| MAIL FROM:<sender@example.com> | [smtpd_sender_restrictions](http://www.postfix.org/postconf.5.html#smtpd_sender_restrictions) | Aliases: RFC5321.MailFrom, Return-Path, Envelope Sender, Envelope From <br>Used by **SPF** |
 | 250 2.1.0 Ok | | |
 | RCPT TO:<recipient@example.com> | [smtpd_recipient_restrictions](http://www.postfix.org/postconf.5.html#smtpd_recipient_restrictions) | |
 | 250 2.1.5 Ok | | |
 | DATA | [smtpd_data_restrictions](http://www.postfix.org/postconf.5.html#smtpd_data_restrictions) | | |
 | 354 End data with <CR><LF>.<CR><LF> | | |  
 | To:<recipient@example.com> | | header checks |
-| From:<sender@example.com> | | RFC5322.From, headar from, message from --> used by DKIM |  
+| From:<sender@example.com> | | Aliases: RFC5322.From, Header From, Message From<br>Used by DKIM |  
 | Subject: Test message | | |  
 | This is a test message | |  body checks |
 | . | | |
@@ -120,4 +120,4 @@ score SPF_HELO_FAIL 5.0
 score SPF_HELO_SOFTFAIL 5.0
 ```
 
-This means that....
+This means that either a soft fail (~all) or a hard fail (-all) policy will result in the e-mail being classified as spam if the IP-address or host is not in the domain's SPF record.

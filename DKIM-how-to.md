@@ -13,7 +13,8 @@ A common used technique used by spammers is to trick the receiving party into be
 
 # Outbound e-mail traffic
 DNS record
-Signin in Postfix
+
+Signing in Postfix
 
 ## Implementing DKIM in Postfix with SpamAssassin
 **Specifics for this setup**

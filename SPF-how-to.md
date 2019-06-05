@@ -1,3 +1,17 @@
+# Table of contents
+- [Introduction](#introduction)
+- [What is SPF?](#what-is-spf-)
+- [Why use SPF?](#why-use-spf-)
+- [Tips, tricks and notices for implementation](#tips--tricks-and-notices-for-implementation)
+- [Outbound e-mail traffic (DNS records)](#outbound-e-mail-traffic--dns-records-)
+- [Inbound e-mail traffic](#inbound-e-mail-traffic)
+  * [Implementing SPF in Postfix with SpamAssassin](#implementing-spf-in-postfix-with-spamassassin)
+  * [Configuring Postfix](#configuring-postfix)
+    + [Postfix configuration for Python SPF policy agent](#postfix-configuration-for-python-spf-policy-agent)
+    + [Postfix configuration for SpamAssassin](#postfix-configuration-for-spamassassin)
+  * [Configuring Python SPF policy agent](#configuring-python-spf-policy-agent)
+  * [Configuring SpamAssassin](#configuring-spamassassin)
+
 # Introduction
 This how to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing SPF.  
 

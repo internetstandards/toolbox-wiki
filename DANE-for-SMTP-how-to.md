@@ -146,6 +146,7 @@ With this information we can create a rollover DNS record for DANE:
 **Assumptions**
 * DNSSEC is used
 * Mail server is operational
+* Software packages are already installed
 
 ### Configuring Postfix
 Postfix plays an important role in using DANE for validating the when available.

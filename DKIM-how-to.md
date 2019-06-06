@@ -9,11 +9,13 @@ A common used technique used by spammers is to trick the receiving party into be
 
 # Tips, tricks and notices for implementation
 * Use a DKIM key (RSA) of [at least 1024 bits](https://tools.ietf.org/html/rfc6376#section-3.3.3) to minimize the successrate of offline attacks. Don't go beyond a key size of 2048 bits since this is not mandatory according to the RFC.
-* Make you to change your DKIM keys regularly. A rotation scheme of 6 months is recommended. 
+* Make sure you to change your DKIM keys regularly. A rotation scheme of 6 months is recommended. 
 * Parked domains should be explicitly configured to not use e-mail. For DKIM this is done with an empty policy: "v=DKIM1; p=".
 
 # Outbound e-mail traffic
-DNS record
+DKIM for outbound e-mail traffic can be accomplished by publishing a DKIM policy as a TXT record in a domain name's DNS zone, and by configuring the e-mail server to sign outbound e-mails.   
+
+## Creating a DKIM policy
 
 Signing in Postfix
 

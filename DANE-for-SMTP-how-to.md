@@ -9,7 +9,7 @@
   * [Publishing DANE records](#publishing-dane-records)
   * [Generating DANE roll-over records](#generating-dane-roll-over-records)
   * [Publishing DANE roll-over records](#publishing-dane-roll-over-records)
-- [Implementing DANE for SMTP on Postfix (Inbound e-mail traffic)](#implementing-dane-for-smtp-on-postfix--inbound-e-mail-traffic-)
+- [Implementing DANE for SMTP on Postfix (inbound e-mail traffic)](#implementing-dane-for-smtp-on-postfix--inbound-e-mail-traffic-)
   * [Configuring Postfix](#configuring-postfix)
 - [Implementing DANE for SMTP on Exim (inbound & outbound e-mail traffic)](#implementing-dane-for-smtp-on-exim--inbound---outbound-e-mail-traffic-)
   * [Configuration for inbound e-mail traffic](#configuration-for-inbound-e-mail-traffic)
@@ -19,9 +19,10 @@
     + [DNSSEC validating resolvers](#dnssec-validating-resolvers)
     + [Configure DNSSEC validation in Exim](#configure-dnssec-validation-in-exim)
     + [Configure DANE](#configure-dane)
-  * [Implementing DANE for SMTP using Halon (inbound & outbound e-mail traffic)](#implementing-dane-for-smtp-using-halon--inbound---outbound-e-mail-traffic-)
+- [Implementing DANE for SMTP using Halon (inbound & outbound e-mail traffic)](#implementing-dane-for-smtp-using-halon--inbound---outbound-e-mail-traffic-)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
 
 # Introduction
 This how to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DANE for SMTP.  
@@ -135,7 +136,7 @@ With this information we can create a rollover DNS record for DANE:
 > _25._tcp.mail.example.com. IN TLSA 2 1 1 c784333d20bcd742b9fdc3236f4e509b8937070e73067e254dd3bf9c45bf4dde  
 > _25._tcp.mail2.example.com. IN TLSA 2 1 1 c784333d20bcd742b9fdc3236f4e509b8937070e73067e254dd3bf9c45bf4dde
 
-# Implementing DANE for SMTP on Postfix (Inbound e-mail traffic)
+# Implementing DANE for SMTP on Postfix (inbound e-mail traffic)
 
 **Specifics for this setup**
 * Linux Debian 9.8 (Stretch) 
@@ -218,7 +219,7 @@ This means that TLS connections are not accepted when the domain you are trying 
 
 Notice that depending on the way you configured Exim, you need to apply DANE for all [SMTP transports](https://www.exim.org/exim-html-current/doc/html/spec_html/ch-how_exim_receives_and_delivers_mail.html#SECTprocaddress).
 
-## Implementing DANE for SMTP using Halon (inbound & outbound e-mail traffic)
+# Implementing DANE for SMTP using Halon (inbound & outbound e-mail traffic)
 Serveral Dutch hosting providers use Halon (a scriptable SMTP server who's virtual appliances are based on FreeBSD) as the internet facing e-mail server. The actual mail boxes reside on Direct Admin (which uses Exim) within the internal network. In this specific setup you could say that all security features are applied at the internet facing mail server which is Halon. 
 
 Halon has built-in support for DANE and can be configured by using the information provided on the website: [https://halon.io/dane](https://halon.io/dane) and [https://wiki.halon.io/DANE](https://wiki.halon.io/DANE).  

@@ -27,9 +27,9 @@
 # Executive Summary
 * DANE is a best-practice technology for securing the transfer of email (SMTP) between organizations across the public Internet.
 * Successful DANE deployments require additional operational discipline.
-* Automated monitoring of your own email servers and related DNS records is is a must.
-* Attention also needs to be paid to proper automation of email server certificate updates.
-* These topics will be covered in more detail below.
+    - Automated monitoring of your own email servers and related DNS records is is a must.
+    - Robust automation of coördinated DNS and email server certificate chain updates.
+    - These topics will be covered in more detail below.
 * Please deploy DANE for your email servers, but plan carefully, botched deployments not not only harm the domain in question, but also have a deterrent effect on adoption by others.
 
 # Introduction

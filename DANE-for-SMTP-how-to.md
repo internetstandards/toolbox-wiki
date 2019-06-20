@@ -1,4 +1,5 @@
 # Table of contents
+- [Executive Summary](#summary)
 - [Introduction](#introduction)
 - [What is DANE?](#what-is-dane-)
 - [Why use DANE for SMTP?](#why-use-dane-for-smtp-)
@@ -23,14 +24,21 @@
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
+# Executive Summary
+* DANE is a best-practice technology for securing the transfer of email (SMTP) between organizations across the public Internet.
+* Successful DANE deployments require additional operational discipline.
+* Automated monitoring of your own email servers and related DNS records is is a must.
+* Attention also needs to be paid to proper automation of email server certificate updates.
+* These topics will be covered in more detail below.
+* Please deploy DANE for your email servers, but plan carefully, botched deployments not not only harm the domain in question, but also have a deterrent effect on adoption by others.
 
 # Introduction
-This how to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DANE for SMTP.  
+This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DANE for SMTP.
 
 # What is DANE?
-DANE is short for "**D**NS-based **A**uthentication of **N**amed **E**ntities" and is described in [RFC 6698](https://tools.ietf.org/html/rfc6698). It offers the option to use the DNSSEC infrastructure to store and sign keys and certificates that are used by TLS. So basically DANE can be used to validate provided certificates based on information (a TLSA signature) published in the DNS zone of a specific domain. 
+DANE is short for "**D**NS-based **A**uthentication of **N**amed **E**ntities" and is described in [RFC 6698](https://tools.ietf.org/html/rfc6698) and [RFC 7671](https://tools.ietf.org/html/rfc7671). DANE enables publication in secure DNS of keys and certificates for use with TLS. DANE TLSA records published in the server operator's signed DNS zone provide a downgrade-resistant means to discover support for STARTTLS and to validate the server's certificate chain without relying on additional trusted parties outside the delegation chain in DNS.
 
-DANE can be used in a web context or in an e-mail context. DANE for web is unfortunately not supported by most browsers and therefore has little added value. DANE for SMTP (which is described in [RFC 7672](https://tools.ietf.org/html/rfc7672) on the other hand, is used increasingly and addresses a couple of shortcomings in SMTP using STARTTLS. DANE for SMTP uses the presence of DANE TLSA records to securely signal TLS support and to publish the means by which SMTP clients can successfully authenticate legitimate SMTP servers. This becomes "opportunistic DANE TLS" (which is better than regular "opportunistic TLS") and creates resistance to downgrade and man-in-the-middle (MITM) attacks.
+DANE is designed to work with any TLS service, not just email, but DANE for HTTP is not presently supported by the major browsers and so has seen little deployment. DANE for SMTP (which is described in [RFC 7672](https://tools.ietf.org/html/rfc7672) on the other hand, is used increasingly and adds active attack (man-in-the-middle) resistance to SMTP transport encryption [RFC 7672 Section 1.3](https://tools.ietf.org/rfc7672#section-1.3). DANE for SMTP uses the presence of DANE TLSA records to securely signal TLS support and to publish the means by which SMTP clients can successfully authenticate legitimate SMTP servers. The result is called "opportunistic DANE TLS", and resists downgrade and man-in-the-middle (MITM) attacks when the destination domain and its MX hosts are DNSSEC signed, and TLSA records are published for each MX host.
 
 # Why use DANE for SMTP?
 The use of opportunistic TLS (via STARTTLS) is not without risks:
@@ -61,7 +69,7 @@ This section describes several pionts for attention when implementing DANE for S
 * Make sure your implementation supports the usage of a CNAME in your MX record. There are some inconsistencies between multiple RFC's. According to [RFC 2181](https://tools.ietf.org/html/rfc2181#section-10.3) a CNAME in MX records is not allowed, while [RFC 7671](https://tools.ietf.org/html/rfc7671#section-7) and [RFC 5321](https://tools.ietf.org/html/rfc5321#section-5.1) imply that the usage of a CNAME in MX records is allowed.
 
 # Outbound e-mail traffic (DNS records)
-This part of the how to describes the steps that should be taken with regard to your outbound e-mail traffic. This enables other parties to use DANE for validating the certificates offered by your e-mail servers. 
+This part of the how-to describes the steps that should be taken with regard to your outbound e-mail traffic. This enables other parties to use DANE for validating the certificates offered by your e-mail servers. 
 
 ## Generating DANE records
 **Primary mail server (mail1.example.com)**
@@ -196,7 +204,7 @@ In Exim you should configure TLS by adding the following to **main/03_exim4-conf
     tls_privatekey = /path/to/private.key
 
 ## Configuration for outbound e-mail traffic
-This part of the how to describes the steps that should be taken with regard to your outbound e-mail traffic. This enables other parties to use DANE for validating the certificates offered by your e-mail servers. 
+This part of the how-to describes the steps that should be taken with regard to your outbound e-mail traffic. This enables other parties to use DANE for validating the certificates offered by your e-mail servers. 
 
 ### DNSSEC validating resolvers
 Make sure to configure DNSSEC validating resolvers on the mail server. When using the locale systemd resolver, make sure to add the following to **/etc/systemd/resolved.conf**.
@@ -222,4 +230,4 @@ Notice that depending on the way you configured Exim, you need to apply DANE for
 # Implementing DANE for SMTP using Halon (inbound & outbound e-mail traffic)
 Serveral Dutch hosting providers use Halon (a scriptable SMTP server who's virtual appliances are based on FreeBSD) as the internet facing e-mail server. The actual mail boxes reside on Direct Admin (which uses Exim) within the internal network. In this specific setup you could say that all security features are applied at the internet facing mail server which is Halon. 
 
-Halon has built-in support for DANE and can be configured by using the information provided on the website: [https://halon.io/dane](https://halon.io/dane) and [https://wiki.halon.io/DANE](https://wiki.halon.io/DANE).  
+Halon has built-in support for DANE and can be configured by using the information provided on the website: [https://halon.io/dane](https://halon.io/dane) and [https://wiki.halon.io/DANE](https://wiki.halon.io/DANE).

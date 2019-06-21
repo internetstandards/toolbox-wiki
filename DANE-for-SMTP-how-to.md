@@ -43,16 +43,50 @@ DANE is designed to work with any TLS service, not just email, but DANE for HTTP
 # Why use DANE for SMTP?
 The use of opportunistic TLS (via STARTTLS) is not without risks:
 * Because forcing the use of TLS for all mail servers would break backwards compatibility, SMTP uses opportunistic TLS (via STARTTLS) as a mechanism to enable secure transport between mail servers. However, the fact that STARTTLS is opportunistic means that the initial connection from one mail server to another always starts unencrypted making it vulnerable to man in the middle attacks. If a mail server does not offer the 'STARTTLS capability' during the SMTP handshake (because it was stripped by an attacker), transport of mail occurs over an unencrypted connection. 
-* By default mail servers do not validate the authenticity of another mail server's certificate; any random certificate is accepted (see [RFC 2487](https://tools.ietf.org/html/rfc2487). This was probably done because there is no user who can act on errors in case they occur. Unfortunately this default behavior introduces the risk of a man in the middle attack; an attacker can offer a false certificate enabling the attacker to decrypt encrypted traffic.
+* By default mail servers do not validate the authenticity of another mail server's certificate; any random certificate is accepted (see [RFC 3207](https://tools.ietf.org/html/rfc3207).
+    - It was unclear which CAs to trust to validate the certificate for a given destination.
+    - As a result of MX indirection, it was unclear which names to verify in the certificate.
+* As as result, even when STARTTLS is used, a man in the middle attacker can intercept the traffic with any certificate of his choice.
 
 DANE addresses these shortcomings because:
-* Sending mail servers can deduce a receiving mail server's ability to use TLS, by the presence of a TLSA record. This means that a connection does not have to start unencrypted (awaiting the STARTTLS capability) but can be encrypted from the start.
-* TLSA records can be used to validate the certificate provided by the receiving mail server. This implies that the administrator of a domain 'guarantees' that the TLSA record is always correct and can be used to validate the certificate. Because of this guarantee the sending mail server does not have to fallback to unencrypted mail transport when the offered certificate does not match a single TLSA record. If this is the case the sending mail server can abort the transport and not send the e-mail.
+* The operator of the receiving mail server is obligated to ensure that any published TLSA records at all times match the server's certificate chain, and that STARTTLS is enabled and working.
+* This allows sending mail servers to unconditionally require STARTTLS with a matching certificate chain. Otherwise, the sending mail server aborts the connection and tries another server or defers the message.
+* Receiving servers with published TLSA records, are therefore no longer vulnerable to "STARTTLS stripping".
 
-# Guaranteeing a valid TLSA record
-Because it is important that there is always a valid TLSA record to make sure mail transport can occur, DANE offers a roll-over mechanism. A roll-over is useful when certificates expire and need to be replaced. Since distributing information via DNS can be a bit slow (depending on the TTL settings), it's important to anticipate a certificate change from a DANE perspective. This can be done by applying a roll-over scheme of which there are two:
-* Current + next. This roll-over scheme provides two TLSA records per mail server. One with the fingerprint of the current mail server's certificate (usage type 3), and another with the fingerprint of the future mail server's certificate (usage type 3). The latter can, for example, be determined by using a Certificate Signing Request (CSR).
-* Current + issuer. This roll-over scheme provides two TLSA records per mail server. One with the fingerprint of the current mail server's certificate (usage type 3), and another with the fingerprint of a certificate within the current mail server's certificate chain of trust; an intermediate or root certificate. 
+# Reliable certificate rollover
+It is a good practice to replace certificates and keys from time to time, but this need not and should not disrupt email delivery even briefly.
+* Since a single TLSA record is tied to a particular certificate or (public) key, the TLSA records that match a server's certificate chain also change from time to time.
+* Because TLSA records are cached by DNS clients, the TLSA records that match a new certificate chain need to be published some time prior to its deployment.
+* But then the new TLSA records will be seen by some clients before the corresponding certificates are in place.
+* An outage is avoided by publishing **two** sets of TLSA records:
+    - Legacy TLSA records that continue to match the old certificate chain until it is replaced.
+    - Fresh TLSA records that will match the new new certificate chain once it is deployed.
+* Both are published together long enough to ensure that nobody should still caching only the legacy records. 
+* When the new certificate chain is deployed, tested and if all is well, the legacy TLSA records are dropped.
+
+Two ways of handling certificate rollover are known to work well, in combination with automated monitoring to ensure that the TLSA records and certificates are always current and correct.
+
+1. **Current + next**. This roll-over scheme always publishes two TLSA records per server certificate.
+    - One with the SHA2-256 fingerprint of the mail server's current public key (a "3 1 1" record).
+    - And a second with the SHA2-256 fingerprint of the mail server's next public key (also a "3 1 1" record).
+2. **Current + issuer**. This roll-over scheme always publishes two TLSA records per mail server certificate.
+    - One with the SHA2-256 fingerprint of the mail server's current public key (3 1 1)
+    - And a second with the SHA2-256 fingerprint of the public key of an issuing CA that directly or indirectly signed the server certificate (2 1 1). This need not be (and typically is not) a root CA.
+
+## Current + next details
+With the "current + next" approach, because both fingerprint are **key** fingerprints, the second can be known in advance of obtaining the corresponding certificate. In particular, if keys are rotated often enough (every 30 to 90 days or so), the next key can be pre-generated as soon-as the previous key and certificate are deployed. This allows plenty of time to publish the corresponding **next** "3 1 1" TLSA record to replace the legacy record for the decommissioned key.
+
+With TLSA record that will match the next key long in place, when it is time to deploy that key with a new certificate some 30 to 90 days later, a new certificate is obtained for *that* key and deployed, and the process begins again with another "next" key generated right away.
+
+Deployment of a new certificate and key must be predicated (automated check) on the corresponding TLSA "3 1 1" record being in place for some time, not only on the primary DNS nameserver, but also on all secondary nameservers. Explicit queries against all the servers are to check for this are highly recommended.
+
+Some servers have keys and certificates for multiple public key algorithms (e.g. both RSA and ECDSA). In that case, not all clients will negotiate the same algorithm and see the same key. This means that a single "3 1 1" record cannot match the server's currently deployed certificate chains. Consequently, for such servers the "3 1 1" current + "3 1 1" next TlSA records need to be provisioned separately for each algorithm. Failure to do that can result in hard to debug connectivity problems with some sending systems and not others.
+
+Use of the same key (and perhaps wildcard certificate) across all of a domain's SMTP servers (all MX hosts) is **not** recommended. Such keys and certificates tend to be rotated across all the servers at the same time, and any deployment mistakes then lead to an outage of inbound email. Large sites with proper monitoring and carefully designed and automated rollover processes can make wildcard certificates work, but if in doubt, don't overestimate your team's ability to execute this flawlessly.
+
+When monitoring your systems, test every IPv4 and IPv6 address of each MX host, not all clients will be able connect to every address, and none should encounter incorrect TLSA records, neglected certificates, or even non-working STARTTLS. Also test each public key algorithm, or stick to just one. All DANE-capable SMTP servers support both RSA and ECDSA P-256, so you can pick just RSA (2048-bit key) or ECDSA (P-256).
+
+Make sure that your servers support TLS 1.2, and offer STARTTLS to all clients, even those that have not sent you email in the past. Denying STARTTLS to clients with no IP "reputation" would lock them out indefinitely if they support DANE, since they then can never send any initial mail in the clear to establish their reputation.
 
 # Tips, tricks and notices for implementation
 This section describes several pionts for attention when implementing DANE for SMTP. 

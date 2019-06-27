@@ -12,6 +12,9 @@
     + [Configuring Python SPF policy agent](#configuring-python-spf-policy-agent)
     + [Configuring SpamAssassin](#configuring-spamassassin)
 
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+
 # Introduction
 This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing SPF.  
 

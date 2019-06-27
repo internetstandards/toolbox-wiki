@@ -121,7 +121,7 @@ With SpamAssassin this can be configured by adding the following scoring configu
 
 ```
 score DKIM_ADSP_ALL 5.0
-#  	No valid author signature, domain signs all mail
+# No valid author signature, domain signs all mail
 
 score DKIM_ADSP_DISCARD 5.0
 # No valid author signature, domain signs all mail and suggests discarding the rest 
@@ -130,7 +130,7 @@ score DKIM_ADSP_NXDOMAIN 5.0
 # No valid author signature and domain not in DNS 
 ```
 
-This means that incoming e-mail is instantly classificied as spam if there is not a valid signature in its header and:
+This means that incoming e-mail is instantly classificied as spam if there is not a valid DKIM signature in the mail header and:
 * the sending domain's DKIM ADSP record states that all e-mail should be signed and all unsigned mails should be discarded (DISCARD).
 * the sending domain's DKIM ADSP record states that all e-mail should be signed (ALL). 
 * the sending domain used in the "From"-header (a.k.a. RFC5322.From, Header From, Message From) does not exist. 

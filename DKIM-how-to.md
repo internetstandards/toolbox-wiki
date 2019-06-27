@@ -9,7 +9,7 @@ A common used technique used by spammers is to trick the receiving party into be
 
 # Tips, tricks and notices for implementation
 * Use a DKIM key (RSA) of [at least 1024 bits](https://tools.ietf.org/html/rfc6376#section-3.3.3) to minimize the successrate of offline attacks. Don't go beyond a key size of 2048 bits since this is not mandatory according to the RFC.
-* Make sure you to change your DKIM keys regularly. A rotation scheme of 6 months is recommended. 
+* Make sure you to change your DKIM keys regularly. A rotation scheme of 6 months is recommended.
 * Parked domains should be explicitly configured to not use e-mail. For DKIM this is done with an empty policy: "v=DKIM1; p=".
 
 # Implementing DKIM with OpenDKIM for Postfix with SpamAssassin
@@ -90,7 +90,10 @@ Create the file **/etc/opendkim/signing_table** and add the following line:
 
 > *@example.nl selector201906._domainkey.example.nl
 
-This concludes the configuration of OpenDKIM. Start OpenDKIM and check your logfiles for possible errors.
+Start OpenDKIM and check your logfiles for possible errors.
+
+#### Key rotation
+OpenDKIM does not support the automated rotation of DKIM keys. This means that you should rotate your keys manually, write a script to do this, or use an existing script like [https://github.com/tetsuo13/OpenDKIM-Rotate-Keys](https://github.com/tetsuo13/OpenDKIM-Rotate-Keys) or (https://github.com/captbrando/dkimrotator)[https://github.com/captbrando/dkimrotator].
 
 ### Publish the DNS record
 

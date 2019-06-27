@@ -13,7 +13,7 @@
     + [Configuring SpamAssassin](#configuring-spamassassin)
 
 # Introduction
-This how to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing SPF.  
+This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing SPF.  
 
 # What is SPF?
 SPF is short for "**S**ender **P**olicy **F**ramework" and is described in [RFC 7208](https://tools.ietf.org/html/rfc7208). It offers domain owners that use their domains for sending e-mail, the possibility to use the DNSSEC infrastructure to publish which hosts (mail servers) are authorized to use their domain names in the "MAIL FROM" and "HELO" identities. So basically SPF is a whitelist which lists all servers that are allowed to send e-mail on behalf of a specific domain. The receiving mail server may use the information (a SPF record) published in the DNS zone of a specific mail sending domain. 
@@ -80,7 +80,7 @@ The follow table provides a schematic overview of an SMTP conversation and relat
 | Connection closed by foreign host. | | |
 
 #### Postfix configuration for Python SPF policy agent  
-The implementation described in this how to uses an external application to perform SPF checking: Python SPF policy agent (postfix-policyd-spf-python). In order for Postfix to be able to use this application, the following needs to be added to **/etc/postfix/master.cf**: 
+The implementation described in this how-to uses an external application to perform SPF checking: Python SPF policy agent (postfix-policyd-spf-python). In order for Postfix to be able to use this application, the following needs to be added to **/etc/postfix/master.cf**: 
 
 `policy-spf unix - n n - - spawn user=nobody argv=/usr/bin/policyd-spf`
 
@@ -114,7 +114,7 @@ Finally, add the following to **/etc/postfix/main.cf** outside of any section to
 ### Configuring Python SPF policy agent
 The next step is to tell the Python SPF policy agent how to behave when checking SPF records. This behavior is determined by adding [configuration parameters](https://manpages.debian.org/stretch/postfix-policyd-spf-python/policyd-spf.conf.5.en.html) to **/etc/postfix-policyd-spf-python/policyd-spf.conf**. 
 
-The default configuration of the Python SPF policy agent provides a binary "block" or "don't block" functionality. However, the implementation described in this how to uses SpamAssassin as a post-SMTP spam filter. This means that Postfix should not reject e-mails coming from e-mail servers that are not listed in the SPF record. Instead an SPF header is appended to the e-mail. The information in the header is used by SpamAssassin to weigh whether an incoming e-mail should be considered spam. This specific setup requires the following non-default configuration parameters in **/etc/postfix-policyd-spf-python/policyd-spf.conf**:
+The default configuration of the Python SPF policy agent provides a binary "block" or "don't block" functionality. However, the implementation described in this how-to uses SpamAssassin as a post-SMTP spam filter. This means that Postfix should not reject e-mails coming from e-mail servers that are not listed in the SPF record. Instead an SPF header is appended to the e-mail. The information in the header is used by SpamAssassin to weigh whether an incoming e-mail should be considered spam. This specific setup requires the following non-default configuration parameters in **/etc/postfix-policyd-spf-python/policyd-spf.conf**:
 
 ```
 HELO_reject = False
@@ -124,7 +124,7 @@ Mail_From_reject = False
 ### Configuring SpamAssassin
 SpamAssassin uses a scoring mechanism in order to determine if an e-mail should be considered spam. By default SpamAssassin considers an e-mail to be spam if the score at least "5". An e-mail starts with a score of 0 and points are added based on the [tests](https://spamassassin.apache.org/old/tests_3_3_x.html) performed. The tests performed can be configured by adding specific [configuration parameters](https://spamassassin.apache.org/full/3.4.x/doc/Mail_SpamAssassin_Conf.html) in **/etc/spamassassin/local.cf**.
 
-Now here's the tricky part. The points added to the score of an incoming e-mail based on the results of a specific test, is at its core a custom job. Many variables can be taken into consideration when scoring an e-mail (which is considered the strength of a post-SMTP spam filter) and the detailed scoring depends on a domain owner's specific wishes. For the sake of this how to, the SPF scoring will be based on the assumption that the domain owner wants to consider an e-mail to be spam if the sending e-mail server's IP-address or host is not in the domain's SPF record. 
+Now here's the tricky part. The points added to the score of an incoming e-mail based on the results of a specific test, is at its core a custom job. Many variables can be taken into consideration when scoring an e-mail (which is considered the strength of a post-SMTP spam filter) and the detailed scoring depends on a domain owner's specific wishes. For the sake of this how-to, the SPF scoring will be based on the assumption that the domain owner wants to consider an e-mail to be spam if the sending e-mail server's IP-address or host is not in the domain's SPF record. 
 
 With SpamAssassin this can be configured by adding the following scoring configuration parameters to **/etc/spamassassin/local.cf**:
 

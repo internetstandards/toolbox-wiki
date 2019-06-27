@@ -1,4 +1,3 @@
-# Under constrution!!
 This document lists the basic usage of commonly used DNS records. It can be used to track commonly made mistakes.
 
 # A

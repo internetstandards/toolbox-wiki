@@ -12,10 +12,7 @@ A common used technique used by spammers is to trick the receiving party into be
 * Make sure you to change your DKIM keys regularly. A rotation scheme of 6 months is recommended. 
 * Parked domains should be explicitly configured to not use e-mail. For DKIM this is done with an empty policy: "v=DKIM1; p=".
 
-# Outbound e-mail traffic
-DKIM for outbound e-mail traffic can be accomplished by publishing a DKIM policy as a TXT record in a domain name's DNS zone, and by configuring the e-mail server to sign outbound e-mails.   
-
-## Implementing DKIM with OpenDKIM for Postfix with SpamAssassin
+# Implementing DKIM with OpenDKIM for Postfix with SpamAssassin
 **Specifics for this setup**
 * Linux Debian 9.8 (Stretch) 
 * SpamAssassin version 3.4.2 (running on Perl version 5.28.1)
@@ -27,6 +24,9 @@ DKIM for outbound e-mail traffic can be accomplished by publishing a DKIM policy
 * DNSSEC is used
 * Mail server is operational
 * Software packages are already installed
+
+## Outbound e-mail traffic
+DKIM for outbound e-mail traffic can be accomplished by publishing a DKIM policy as a TXT record in a domain name's DNS zone, and by configuring the e-mail server to sign outbound e-mails.
 
 ### Set up OpenDKIM and created key pair for your domain
 Make sure the file ***/etc/opendkim.conf** has a least the following configuration options.
@@ -109,3 +109,28 @@ The final step is to configure Postfix to actually sign outbound e-mail using Op
     non_smtpd_milters = inet:localhost:12301
 
 When you are ready to start using DKIM restart Postfix, but make sure you waited long enough for the DKIM DNS record to succesfully propagate.
+
+## Inbound e-mail
+
+### Configuring SpamAssassin
+SpamAssassin uses a scoring mechanism in order to determine if an e-mail should be considered spam. By default SpamAssassin considers an e-mail to be spam if the score at least "5". An e-mail starts with a score of 0 and points are added based on the [tests](https://spamassassin.apache.org/old/tests_3_3_x.html) performed. The tests performed can be configured by adding specific [configuration parameters](https://spamassassin.apache.org/full/3.4.x/doc/Mail_SpamAssassin_Conf.html) in **/etc/spamassassin/local.cf**.
+
+Now here's the tricky part. The points added to the score of an incoming e-mail based on the results of a specific test, is at its core a custom job. Many variables can be taken into consideration when scoring an e-mail (which is considered the strength of a post-SMTP spam filter) and the detailed scoring depends on a domain owner's specific wishes. For the sake of this how-to, the DKIM scoring will be based on the assumption that the domain owner wants to consider an e-mail to be spam if the sending e-mail server's IP-address or host is not in the domain's SPF record. 
+
+With SpamAssassin this can be configured by adding the following scoring configuration parameters to **/etc/spamassassin/local.cf**:
+
+```
+score DKIM_ADSP_ALL 5.0
+#  	No valid author signature, domain signs all mail
+
+score DKIM_ADSP_DISCARD 5.0
+# No valid author signature, domain signs all mail and suggests discarding the rest 
+
+score DKIM_ADSP_NXDOMAIN 5.0
+# No valid author signature and domain not in DNS 
+```
+
+This means that incoming e-mail is instantly classificied as spam if there is not a valid signature in its header and:
+* the sending domain's DKIM ADSP record states that all e-mail should be signed and all unsigned mails should be discarded (DISCARD).
+* the sending domain's DKIM ADSP record states that all e-mail should be signed (ALL). 
+* the sending domain used in the "From"-header (a.k.a. RFC5322.From, Header From, Message From) does not exist. 

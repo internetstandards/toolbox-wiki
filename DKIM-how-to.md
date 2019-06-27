@@ -1,3 +1,19 @@
+# Table of contents
+- [Introduction](#introduction)
+- [What is DKIM?](#what-is-dkim-)
+- [Why use DKIM?](#why-use-dkim-)
+- [Tips, tricks and notices for implementation](#tips--tricks-and-notices-for-implementation)
+- [Implementing DKIM with OpenDKIM for Postfix with SpamAssassin](#implementing-dkim-with-opendkim-for-postfix-with-spamassassin)
+  * [Outbound e-mail traffic](#outbound-e-mail-traffic)
+    + [Set up OpenDKIM and created key pair for your domain](#set-up-opendkim-and-created-key-pair-for-your-domain)
+      - [Key rotation](#key-rotation)
+    + [Publish the DNS record](#publish-the-dns-record)
+    + [Configure Postfix](#configure-postfix)
+  * [Inbound e-mail](#inbound-e-mail)
+    + [Configuring SpamAssassin](#configuring-spamassassin)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
 # Introduction
 This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DKIM.
 

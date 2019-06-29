@@ -43,9 +43,9 @@ DANE is designed to work with any TLS service, not just email, but DANE for HTTP
 # Why use DANE for SMTP?
 The use of opportunistic TLS (via STARTTLS) is not without risks:
 * Because forcing the use of TLS for all mail servers would break backwards compatibility, SMTP uses opportunistic TLS (via STARTTLS) as a mechanism to enable secure transport between mail servers. However, the fact that STARTTLS is opportunistic means that the initial connection from one mail server to another always starts unencrypted making it vulnerable to man in the middle attacks. If a mail server does not offer the 'STARTTLS capability' during the SMTP handshake (because it was stripped by an attacker), transport of mail occurs over an unencrypted connection. 
-* By default mail servers do not validate the authenticity of another mail server's certificate; any random certificate is accepted (see [RFC 3207](https://tools.ietf.org/html/rfc3207).
-    - It was unclear which CAs to trust to validate the certificate for a given destination.
-    - As a result of MX indirection, it was unclear which names to verify in the certificate.
+* By default mail servers do not validate the authenticity of another mail server's certificate; any random certificate is accepted (see [RFC 3207](https://tools.ietf.org/html/rfc3207)).
+    - It was unclear which CAs to trust when validating the certificate for a given destination.
+    - In MTA-to-MTA SMTP, server hostnames for the destination domain are obtained indirectly via DNS MX loookups, but, without DNSSEC, these names cannot be trusted.  As a result, it was unclear which names to verify in the certificate.
 * As as result, even when STARTTLS is used, a man in the middle attacker can intercept the traffic with any certificate of his choice.
 
 DANE addresses these shortcomings because:

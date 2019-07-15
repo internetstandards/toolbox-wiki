@@ -1,16 +1,22 @@
 # Table of contents
-- [Executive Summary](#summary)
+- [Executive Summary](#executive-summary)
 - [Introduction](#introduction)
 - [What is DANE?](#what-is-dane-)
 - [Why use DANE for SMTP?](#why-use-dane-for-smtp-)
-- [Guaranteeing a valid TLSA record](#guaranteeing-a-valid-tlsa-record)
+  * [DANE explained by illustrations](#dane-explained-by-illustrations)
+    + [Mail delivery: TLS without DANE](#mail-delivery--tls-without-dane)
+    + [Mail delivery: TLS with MITM using evil certificate](#mail-delivery--tls-with-mitm-using-evil-certificate)
+    + [Mail delivery: TLS with MITM using evil certificate](#mail-delivery--tls-with-mitm-using-evil-certificate-1)
+    + [Mail delivery: TLS with DANE](#mail-delivery--tls-with-dane)
+- [Reliable certificate rollover](#reliable-certificate-rollover)
+  * [Current + next details](#current---next-details)
 - [Tips, tricks and notices for implementation](#tips--tricks-and-notices-for-implementation)
-- [Outbound e-mail traffic (DNS records)](#outbound-e-mail-traffic--dns-records-)
+- [Inbound e-mail traffic (publishing DANE DNS records)](#inbound-e-mail-traffic--publishing-dane-dns-records-)
   * [Generating DANE records](#generating-dane-records)
   * [Publishing DANE records](#publishing-dane-records)
   * [Generating DANE roll-over records](#generating-dane-roll-over-records)
   * [Publishing DANE roll-over records](#publishing-dane-roll-over-records)
-- [Implementing DANE for SMTP on Postfix (inbound e-mail traffic)](#implementing-dane-for-smtp-on-postfix--inbound-e-mail-traffic-)
+- [Implementing DANE for SMTP on Postfix (inbound & outbound e-mail traffic)](#implementing-dane-for-smtp-on-postfix--inbound---outbound-e-mail-traffic-)
   * [Configuring Postfix](#configuring-postfix)
 - [Implementing DANE for SMTP on Exim (inbound & outbound e-mail traffic)](#implementing-dane-for-smtp-on-exim--inbound---outbound-e-mail-traffic-)
   * [Configuration for inbound e-mail traffic](#configuration-for-inbound-e-mail-traffic)
@@ -52,6 +58,24 @@ DANE addresses these shortcomings because:
 * The operator of the receiving mail server is obligated to ensure that any published TLSA records at all times match the server's certificate chain, and that STARTTLS is enabled and working.
 * This allows sending mail servers to unconditionally require STARTTLS with a matching certificate chain. Otherwise, the sending mail server aborts the connection and tries another server or defers the message.
 * Receiving servers with published TLSA records, are therefore no longer vulnerable to "STARTTLS stripping".
+
+## DANE explained by illustrations
+### Mail delivery: TLS without DANE
+The illustration below shows two TLS capable e-mail servers without using DANE.
+![](dane-example-1-no-dane.png)
+
+### Mail delivery: TLS with MITM using evil certificate 
+The illustration below shows what happens when an attacker performs a man in the middle (MITM) attack and inserts its own certificate into the connection process.
+![](dane-example-1-evilcert.png)
+
+### Mail delivery: TLS with MITM using evil certificate 
+The illustration below shows what happens when an attacker performs a man in the middle (MITM) attack and forces an unsecure connection by stripping the TLS capability from the receiving e-mail server. 
+![](dane-example-1-striptls.png)
+
+### Mail delivery: TLS with DANE
+The illustration below shows how the use of DANE can protect against man in the middle (MITM) attacks by addressing the shortcomings of TLS without DANE.
+![](dane-example-1-with-dane.png)
+
 
 # Reliable certificate rollover
 It is a good practice to replace certificates and keys from time to time, but this need not and should not disrupt email delivery even briefly.
@@ -102,8 +126,8 @@ This section describes several pionts for attention when implementing DANE for S
 * Implement monitoring of your DANE records to be able to detect problems as soon as possible. 
 * Make sure your implementation supports the usage of a CNAME in your MX record. There are some inconsistencies between multiple RFC's. According to [RFC 2181](https://tools.ietf.org/html/rfc2181#section-10.3) a CNAME in MX records is not allowed, while [RFC 7671](https://tools.ietf.org/html/rfc7671#section-7) and [RFC 5321](https://tools.ietf.org/html/rfc5321#section-5.1) imply that the usage of a CNAME in MX records is allowed.
 
-# Outbound e-mail traffic (DNS records)
-This part of the how-to describes the steps that should be taken with regard to your outbound e-mail traffic. This enables other parties to use DANE for validating the certificates offered by your e-mail servers. 
+# Inbound e-mail traffic (publishing DANE DNS records)
+This part of the how-to describes the steps that should be taken with regard to your inbound e-mail traffic, which primairily involves publishing DANE DNS records. This enables other parties to use DANE for validating the certificates offered by your e-mail servers. 
 
 ## Generating DANE records
 **Primary mail server (mail1.example.nl)**
@@ -178,7 +202,7 @@ With this information we can create a rollover DNS record for DANE:
 > _25._tcp.mail.example.nl. IN TLSA 2 1 1 c784333d20bcd742b9fdc3236f4e509b8937070e73067e254dd3bf9c45bf4dde  
 > _25._tcp.mail2.example.nl. IN TLSA 2 1 1 c784333d20bcd742b9fdc3236f4e509b8937070e73067e254dd3bf9c45bf4dde
 
-# Implementing DANE for SMTP on Postfix (inbound e-mail traffic)
+# Implementing DANE for SMTP on Postfix (inbound & outbound e-mail traffic)
 
 **Specifics for this setup**
 * Linux Debian 9.8 (Stretch) 
@@ -238,7 +262,7 @@ In Exim you should configure TLS by adding the following to **main/03_exim4-conf
     tls_privatekey = /path/to/private.key
 
 ## Configuration for outbound e-mail traffic
-This part of the how-to describes the steps that should be taken with regard to your outbound e-mail traffic. This enables other parties to use DANE for validating the certificates offered by your e-mail servers. 
+This part of the how-to describes the steps that should be taken with regard to your outbound e-mail traffic. This enables your e-mail environment to use DANE for validating the certificates offered by other e-mail servers. 
 
 ### DNSSEC validating resolvers
 Make sure to configure DNSSEC validating resolvers on the mail server. When using the locale systemd resolver, make sure to add the following to **/etc/systemd/resolved.conf**.

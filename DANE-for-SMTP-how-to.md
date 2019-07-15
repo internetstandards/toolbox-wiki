@@ -106,7 +106,7 @@ This section describes several pionts for attention when implementing DANE for S
 This part of the how-to describes the steps that should be taken with regard to your outbound e-mail traffic. This enables other parties to use DANE for validating the certificates offered by your e-mail servers. 
 
 ## Generating DANE records
-**Primary mail server (mail1.example.com)**
+**Primary mail server (mail1.example.nl)**
 
 Generate the DANE SHA-256 hash with the following command:
 
@@ -116,7 +116,7 @@ This command results in the following output:
  
 > (stdin)= 29c8601cb562d00aa7190003b5c17e61a93dcbed3f61fd2f86bd35fbb461d084
 
-**Secondary mail server (mail2.example.com)**
+**Secondary mail server (mail2.example.nl)**
 
 For the secondary mail server we generate the DANE SHA-256 hash using the command:
 
@@ -133,8 +133,8 @@ Now that we have the SHA-256 hashes, we can construct the DNS records. We make t
 
 With this information we can create the DNS record for DANE:
 
-> _25._tcp.mail.example.com. IN TLSA 3 1 1 29c8601cb562d00aa7190003b5c17e61a93dcbed3f61fd2f86bd35fbb461d084  
-> _25._tcp.mail2.example.com. IN TLSA 3 1 1 22c635348256dc53a2ba6efe56abfbe2f0ae70be2238a53472fef5064d9cf437
+> _25._tcp.mail.example.nl. IN TLSA 3 1 1 29c8601cb562d00aa7190003b5c17e61a93dcbed3f61fd2f86bd35fbb461d084  
+> _25._tcp.mail2.example.nl. IN TLSA 3 1 1 22c635348256dc53a2ba6efe56abfbe2f0ae70be2238a53472fef5064d9cf437
 
 ## Generating DANE roll-over records
 We use the provided bundle file for generating the DANE hashes belonging to the root certificate. In order to do that, we first split the bundle file into multiple certificates using `cat ca-bundle-file.crt | awk 'BEGIN {c=0;} /BEGIN CERT/{c++} { print > "bundlecert." c ".crt"}'`. In this specific case this results in two files: _bundlecert.1.crt_ and _bundlecert.2.crt_.
@@ -175,8 +175,8 @@ Now that we have the SHA-256 hash, we can construct the DANE roll-over DNS recor
 * Matching-type field is "**1**"; because we use SHA-256.
 
 With this information we can create a rollover DNS record for DANE:
-> _25._tcp.mail.example.com. IN TLSA 2 1 1 c784333d20bcd742b9fdc3236f4e509b8937070e73067e254dd3bf9c45bf4dde  
-> _25._tcp.mail2.example.com. IN TLSA 2 1 1 c784333d20bcd742b9fdc3236f4e509b8937070e73067e254dd3bf9c45bf4dde
+> _25._tcp.mail.example.nl. IN TLSA 2 1 1 c784333d20bcd742b9fdc3236f4e509b8937070e73067e254dd3bf9c45bf4dde  
+> _25._tcp.mail2.example.nl. IN TLSA 2 1 1 c784333d20bcd742b9fdc3236f4e509b8937070e73067e254dd3bf9c45bf4dde
 
 # Implementing DANE for SMTP on Postfix (inbound e-mail traffic)
 

@@ -1,4 +1,5 @@
 # Table of contents
+- [Table of contents](#table-of-contents)
 - [Executive Summary](#executive-summary)
 - [Introduction](#introduction)
 - [What is DANE?](#what-is-dane-)
@@ -27,8 +28,17 @@
     + [Configure DNSSEC validation in Exim](#configure-dnssec-validation-in-exim)
     + [Configure DANE](#configure-dane)
 - [Implementing DANE for SMTP using Halon (inbound & outbound e-mail traffic)](#implementing-dane-for-smtp-using-halon--inbound---outbound-e-mail-traffic-)
+  * [Generic configuration](#generic-configuration)
+    + [Install or generate key pair](#install-or-generate-key-pair-1)
+    + [DNSSEC](#dnssec)
+  * [Inbound](#inbound)
+  * [Outbound](#outbound)
+    + [Transport Label](#transport-label)
+    + [Scripting](#scripting)
+    + [Logging](#logging)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
 
 # Executive Summary
 * DANE is a best-practice technology for securing the transfer of email (SMTP) between organizations across the public Internet.

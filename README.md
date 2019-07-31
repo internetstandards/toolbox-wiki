@@ -5,6 +5,8 @@ This GitHub repository is created and maintained by the Dutch Internet Standards
 # Special thanks
 Our infinite gratitude goes out to the following people for their support in building these how-to's.
 
+Alexander Brotman
+Anders Berggren
 Marc van de Geijn  
 Mark Scholten  
 Simon Besteman  

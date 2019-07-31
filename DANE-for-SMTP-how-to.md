@@ -46,7 +46,7 @@
     - Automated monitoring of your own email servers and related DNS records is is a must.
     - Robust automation of coordinated DNS and email server certificate chain updates.
     - These topics will be covered in more detail below.
-* Please deploy DANE for your email servers, but plan carefully, botched deployments not not only harm the domain in question, but also have a deterrent effect on adoption by others.
+* Please deploy DNSSEC, and DANE for your email servers, but plan carefully. Botched deployments not not only harm the domain in question, but also have a deterrent effect on adoption by others.
 
 # Introduction
 This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DANE for SMTP.

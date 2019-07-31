@@ -44,7 +44,7 @@
 * DANE is a best-practice technology for securing the transfer of email (SMTP) between organizations across the public Internet.
 * Successful DANE deployments require additional operational discipline.
     - Automated monitoring of your own email servers and related DNS records is is a must.
-    - Robust automation of coördinated DNS and email server certificate chain updates.
+    - Robust automation of coordinated DNS and email server certificate chain updates.
     - These topics will be covered in more detail below.
 * Please deploy DANE for your email servers, but plan carefully, botched deployments not not only harm the domain in question, but also have a deterrent effect on adoption by others.
 
@@ -131,7 +131,7 @@ This section describes several pionts for attention when implementing DANE for S
 * Mail servers don't validate certificates and therefore don't have their own certificate store. That's why DANE for SMTP only supports usage type "2" (DANE-TA) and usage type "3" (DANE-EE). Usage type "0" (PKIX-TA) and usage type "1" (PKIX-EE) are not supported. 
 * Make sure the TTL (time-to-live) of your TLSA records is not too high. This makes it possible to apply changes relatively fast in case of problems. A TTL between 30 minutes (1800) and 1 hour (3600) is recommended.
 * The refresh value of your full DNS zone should be in accordance with the TTL setting of your TLSA record, to make sure all name servers give the same information when (after expiration of the TLSA TTL) being queried.
-* In case of roll-over scheme "current + issuer", the use of the root certificate is preferred because in some contexts ([PKIoverheid](https://en.wikipedia.org/wiki/PKIoverheid)) this makes it easier to switch supplier / certficate without impacting DANE. (Remember [DigiNotar](https://en.wikipedia.org/wiki/DigiNotar)). 
+* In case of roll-over scheme "current + issuer", the use of the root certificate is preferred because in some contexts ([PKIoverheid](https://en.wikipedia.org/wiki/PKIoverheid)) this makes it easier to switch supplier / certificate without impacting DANE. (Remember [DigiNotar](https://en.wikipedia.org/wiki/DigiNotar)). 
 * Roll-over scheme "current + next" gives less flexibility but the highest form of certainty, because of "tight pinning".
 * Implement monitoring of your DANE records to be able to detect problems as soon as possible. 
 * Make sure your implementation supports the usage of a CNAME in your MX record. There are some inconsistencies between multiple RFC's. According to [RFC 2181](https://tools.ietf.org/html/rfc2181#section-10.3) a CNAME in MX records is not allowed, while [RFC 7671](https://tools.ietf.org/html/rfc7671#section-7) and [RFC 5321](https://tools.ietf.org/html/rfc5321#section-5.1) imply that the usage of a CNAME in MX records is allowed.
@@ -296,7 +296,7 @@ This means that TLS connections are not accepted when the domain you are trying 
 Notice that depending on the way you configured Exim, you need to apply DANE for all [SMTP transports](https://www.exim.org/exim-html-current/doc/html/spec_html/ch-how_exim_receives_and_delivers_mail.html#SECTprocaddress).
 
 # Implementing DANE for SMTP on Halon (inbound & outbound e-mail traffic)
-Serveral Dutch hosting providers use Halon (a scriptable SMTP server who's virtual appliances are based on FreeBSD) as the internet facing e-mail server. The actual mail boxes reside on Direct Admin (which uses Exim) within the internal network. In this specific setup you could say that all security features are applied at the internet facing mail server which is Halon. 
+Several Dutch hosting providers use Halon (a scriptable SMTP server who's virtual appliances are based on FreeBSD) as the internet facing e-mail server. The actual mail boxes reside on Direct Admin (which uses Exim) within the internal network. In this specific setup you could say that all security features are applied at the internet facing mail server which is Halon. 
 
 Halon has built-in support for DANE and can be configured in several ways, this how-to uses the built-in web interface. For more information on configuration you can visit [https://halon.io/dane](https://halon.io/dane) and [https://wiki.halon.io/DANE](https://wiki.halon.io/DANE).
 
@@ -311,8 +311,8 @@ Halon has built-in support for DANE and can be configured in several ways, this 
 
 Navigate to: `Configuration -> Email engine - > Certificates and keys -> Add`
 
-- Give an ID (name) for the certifcate: only lowercase, numbers and letters (limitation of Halon). 
-- Select type “X.509 and private key” and hit *Generate* and fill in the fields or upload a certifcate (chain with private key).
+- Give an ID (name) for the certificate: only lowercase, numbers and letters (limitation of Halon). 
+- Select type “X.509 and private key” and hit *Generate* and fill in the fields or upload a certificate (chain with private key).
 - Add a comment like name of the CN and date of validity.
 
 ### DNSSEC

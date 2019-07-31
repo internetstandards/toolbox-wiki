@@ -43,10 +43,10 @@
 # Executive Summary
 * DANE is a best-practice technology for securing the transfer of email (SMTP) between organizations across the public Internet.
 * Successful DANE deployments require additional operational discipline.
-    - Automated monitoring of your own email servers and related DNS records is is a must.
+    - Automated monitoring of your own email servers and related DNS records is a must.
     - Robust automation of coordinated DNS and email server certificate chain updates.
     - These topics will be covered in more detail below.
-* Please deploy DNSSEC, and DANE for your email servers, but plan carefully. Botched deployments not not only harm the domain in question, but also have a deterrent effect on adoption by others.
+* Please deploy DNSSEC, and DANE for your email servers, but plan carefully. Botched deployments not only harm the domain in question, but also have a deterrent effect on adoption by others.
 
 # Introduction
 This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DANE for SMTP.
@@ -61,7 +61,7 @@ The use of opportunistic TLS (via STARTTLS) is not without risks:
 * Because forcing the use of TLS for all mail servers would break backwards compatibility, SMTP uses opportunistic TLS (via STARTTLS) as a mechanism to enable secure transport between mail servers. However, the fact that STARTTLS is opportunistic means that the initial connection from one mail server to another always starts unencrypted making it vulnerable to man in the middle attacks. If a mail server does not offer the 'STARTTLS capability' during the SMTP handshake (because it was stripped by an attacker), transport of mail occurs over an unencrypted connection. 
 * By default mail servers do not validate the authenticity of another mail server's certificate; any random certificate is accepted (see [RFC 3207](https://tools.ietf.org/html/rfc3207)).
     - It was unclear which CAs to trust when validating the certificate for a given destination.
-    - In MTA-to-MTA SMTP, server hostnames for the destination domain are obtained indirectly via DNS MX loookups, but, without DNSSEC, these names cannot be trusted.  As a result, it was unclear which names to verify in the certificate.
+    - In MTA-to-MTA SMTP, server hostnames for the destination domain are obtained indirectly via DNS MX lookups, but, without DNSSEC, these names cannot be trusted.  As a result, it was unclear which names to verify in the certificate.
 * As as result, even when STARTTLS is used, a man in the middle attacker can intercept the traffic with any certificate of his choice.
 
 DANE addresses these shortcomings because:
@@ -114,7 +114,7 @@ With TLSA record that will match the next key long in place, when it is time to 
 
 Deployment of a new certificate and key must be predicated (automated check) on the corresponding TLSA "3 1 1" record being in place for some time, not only on the primary DNS nameserver, but also on all secondary nameservers. Explicit queries against all the servers are to check for this are highly recommended.
 
-Some servers have keys and certificates for multiple public key algorithms (e.g. both RSA and ECDSA). In that case, not all clients will negotiate the same algorithm and see the same key. This means that a single "3 1 1" record cannot match the server's currently deployed certificate chains. Consequently, for such servers the "3 1 1" current + "3 1 1" next TlSA records need to be provisioned separately for each algorithm. Failure to do that can result in hard to debug connectivity problems with some sending systems and not others.
+Some servers have keys and certificates for multiple public key algorithms (e.g. both RSA and ECDSA). In that case, not all clients will negotiate the same algorithm and see the same key. This means that a single "3 1 1" record cannot match the server's currently deployed certificate chains. Consequently, for such servers the "3 1 1" current + "3 1 1" next TLSA records need to be provisioned separately for each algorithm. Failure to do that can result in hard to debug connectivity problems with some sending systems and not others.
 
 Use of the same key (and perhaps wildcard certificate) across all of a domain's SMTP servers (all MX hosts) is **not** recommended. Such keys and certificates tend to be rotated across all the servers at the same time, and any deployment mistakes then lead to an outage of inbound email. Large sites with proper monitoring and carefully designed and automated rollover processes can make wildcard certificates work, but if in doubt, don't overestimate your team's ability to execute this flawlessly.
 
@@ -125,6 +125,7 @@ Make sure that your servers support TLS 1.2, and offer STARTTLS to all clients, 
 # Tips, tricks and notices for implementation
 This section describes several pionts for attention when implementing DANE for SMTP. 
 
+* Make sure that DNSSEC is implemented properly. A lot of DANE breakage stems from receiving/recipient domains with broken DNSSEC implementation.
 * Purchasing of expensive certificates for mail server has no to little added value for the confidentiality since mail server don't validate certificates by default. Depending on the context there can be other advantages which makes organizations decide to use specific certificates.
 * It is recommended to use a certificates public key for generating a TLSA signature (selector type "1") instead of the full certificate (selector type "0"), because this enables the reuse of key materials. Notice that the use of Forward Secrecy decreases the need to use a new key-pair on every occasion. 
 * An issuer certificate (usage type "2") validates only when the full certificate chain is offered by the receiving mail server. 

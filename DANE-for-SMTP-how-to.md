@@ -78,7 +78,7 @@ The illustration below shows two TLS capable e-mail servers without using DANE.
 The illustration below shows what happens when an attacker performs a man in the middle (MITM) attack and inserts its own certificate into the connection process.
 ![](dane-example-1-evilcert.png)
 
-### Mail delivery: TLS with MITM using evil certificate 
+### Mail delivery: TLS with MITM stripping TLS 
 The illustration below shows what happens when an attacker performs a man in the middle (MITM) attack and forces an unsecure connection by stripping the TLS capability from the receiving e-mail server. 
 ![](dane-example-1-striptls.png)
 

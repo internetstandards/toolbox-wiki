@@ -1,13 +1,11 @@
-# Table of contents
-- [Table of contents](#table-of-contents)
 - [Executive Summary](#executive-summary)
 - [Introduction](#introduction)
 - [What is DANE?](#what-is-dane-)
 - [Why use DANE for SMTP?](#why-use-dane-for-smtp-)
-  * [DANE explained by illustrations](#dane-explained-by-illustrations)
+  * [Advantages of DANE explained by illustrations](#advantages-of-dane-explained-by-illustrations)
     + [Mail delivery: TLS without DANE](#mail-delivery--tls-without-dane)
     + [Mail delivery: TLS with MITM using evil certificate](#mail-delivery--tls-with-mitm-using-evil-certificate)
-    + [Mail delivery: TLS with MITM using evil certificate](#mail-delivery--tls-with-mitm-using-evil-certificate-1)
+    + [Mail delivery: TLS with MITM stripping TLS](#mail-delivery--tls-with-mitm-stripping-tls)
     + [Mail delivery: TLS with DANE](#mail-delivery--tls-with-dane)
 - [Reliable certificate rollover](#reliable-certificate-rollover)
   * [Current + next details](#current---next-details)
@@ -27,7 +25,7 @@
     + [DNSSEC validating resolvers](#dnssec-validating-resolvers)
     + [Configure DNSSEC validation in Exim](#configure-dnssec-validation-in-exim)
     + [Configure DANE](#configure-dane)
-- [Implementing DANE for SMTP using Halon (inbound & outbound e-mail traffic)](#implementing-dane-for-smtp-using-halon--inbound---outbound-e-mail-traffic-)
+- [Implementing DANE for SMTP on Halon (inbound & outbound e-mail traffic)](#implementing-dane-for-smtp-on-halon--inbound---outbound-e-mail-traffic-)
   * [Generic configuration](#generic-configuration)
     + [Install or generate key pair](#install-or-generate-key-pair-1)
     + [DNSSEC](#dnssec)
@@ -71,7 +69,7 @@ DANE addresses these shortcomings because:
 * This allows sending mail servers to unconditionally require STARTTLS with a matching certificate chain. Otherwise, the sending mail server aborts the connection and tries another server or defers the message.
 * Receiving servers with published TLSA records, are therefore no longer vulnerable to "STARTTLS stripping".
 
-## DANE explained by illustrations
+## Advantages of DANE explained by illustrations
 ### Mail delivery: TLS without DANE
 The illustration below shows two TLS capable e-mail servers without using DANE.
 ![](dane-example-1-no-dane.png)

@@ -86,6 +86,8 @@ The illustration below shows what happens when an attacker performs a man in the
 The illustration below shows how the use of DANE can protect against man in the middle (MITM) attacks by addressing the shortcomings of TLS without DANE.
 ![](dane-example-1-with-dane.png)
 
+### Mail delivery: TLS with DANE without DNSSEC
+Although guaranteeing reliable DNS resolving is actually an advantage of DNSSEC, it is still worth mentioning here. Notice that in the example above (TLS with DANE) the lack of DNSSEC would make it possible for an attacker to alter DNS responses (2 and 4). Such an attack can be used to trick the sender into sending e-mail to a rogue e-mail server. 
 
 # Reliable certificate rollover
 It is a good practice to replace certificates and keys from time to time, but this need not and should not disrupt email delivery even briefly.

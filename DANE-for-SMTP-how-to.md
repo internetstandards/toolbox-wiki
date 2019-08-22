@@ -52,53 +52,76 @@ This how-to is created by the Dutch Internet Standards Platform (the organizatio
 # What is DANE?
 DANE is short for "**D**NS-based **A**uthentication of **N**amed **E**ntities" and is described in [RFC 6698](https://tools.ietf.org/html/rfc6698) and [RFC 7671](https://tools.ietf.org/html/rfc7671). DANE establishes a downgrade-resistant method to verify an SMTP servers identity **before** it starts to transport an email message over a STARTTLS encrypted layer. In order to achieve this it uses verification information retrieved from the recipients DNSSEC signed DNS zone. DANE does not rely on additional trusted parties outside the delegation chain in DNS.
 
-DANE, as a method, has been designed to work with any TLS service. DANE for SMTP (which is described in [RFC 7672](https://tools.ietf.org/html/rfc7672) implements the DANE method for SMTP. It is used increasingly and adds active attack (man-in-the-middle) resistance to SMTP transport encryption [RFC 7672 Section 1.3](https://tools.ietf.org/rfc7672#section-1.3). DANE for SMTP uses the presence of DNS TLSA ressource records to securely signal TLS support and to publish the means by which SMTP clients can successfully authenticate legitimate SMTP servers. The result is called "opportunistic DANE TLS", and resists downgrade and man-in-the-middle (MITM) attacks when the destination domain and its MX hosts are DNSSEC signed, and TLSA records are published for each MX host. While possible, DANE for HTTP is not presently supported by the major browsers and so has seen little deployment.
+DANE, as a method, has been designed to work with any TLS service. DANE for SMTP (which is described in [RFC 7672](https://tools.ietf.org/html/rfc7672) implements the DANE method for SMTP. It is used increasingly and adds active attack (man-in-the-middle) resistance to SMTP transport encryption [RFC 7672 Section 1.3](https://tools.ietf.org/rfc7672#section-1.3). DANE for SMTP uses the presence of DNS TLSA ressource records to **securely signal TLS support** and to publish the means by which SMTP clients can successfully **authenticate legitimate SMTP servers**. The result is called "opportunistic DANE TLS", and resists downgrade and man-in-the-middle (MITM) attacks when the destination domain and its MX hosts are DNSSEC signed, and TLSA records are published for each MX host. While possible, DANE for HTTP is not presently supported by the major browsers and so has seen little deployment.
 
 # Why use DANE for SMTP?
-DANE offers several advantages by binding X.509 certificates to domains using DNSSEC. In an SMTP context this allows sending e-mail servers to verify the autenticity of the offered certificate by the receiving domain's e-mail server. This helps to address risks that occur when using TLS connections between e-mail servers.  
+At this time it is not possible to require **mandatory** transport encryption (TLS) in public mail transport. A mail server might not support transporting messages using encryption. Today only plaintext or **opportunistic** transport encryption are applicable – opportunistic because it is up to the receiving server to decide if it wants to and is able to send messages using TLS (via STARTTLS).
 
-The use of opportunistic TLS (via STARTTLS) is not without risks:
-* Because forcing the use of TLS for all mail servers would break backwards compatibility, SMTP uses opportunistic TLS (via STARTTLS) as a mechanism to enable secure transport between mail servers. However, the fact that STARTTLS is opportunistic means that the initial connection from one mail server to another always starts unencrypted making it vulnerable to man in the middle attacks. If a mail server does not offer the 'STARTTLS capability' during the SMTP handshake (because it was stripped by an attacker), transport of mail occurs over an unencrypted connection. 
+DANE offers several advantages by binding X.509 certificates to domains using DNSSEC. In an SMTP context this allows **a)** sending mail servers to securely signal TLS support by the receiving domain's mail server, and **b)** sending mail servers to verify the autenticity of the offered certificate by the receiving domain's mail server. This helps to address risks that occur when using oppurtunistic TLS connections between mail servers.  
+
+## Risks of SMTP with opportunistic TLS
+The way SMTP was designed including the usage of opportunistic TLS (via STARTTLS) is not without risks:
+* A sending server has no means to determine **beforehand** if the receiving server supports encrypted transport. Only after the communication has begun the sending server may learn from the features the receiving server supports that it allows for encrypted transport.
+  * SMTP uses opportunistic TLS (via STARTTLS) as a mechanism to enable secure transport between mail servers. However, the fact that STARTTLS is opportunistic means that the initial connection from one mail server to another always starts unencrypted making it vulnerable to man in the middle attacks. If a mail server does not offer the 'STARTTLS capability' during the SMTP handshake (because it was stripped by an attacker), transport of mail occurs over an unencrypted connection. 
+  * Forcing the use of TLS for all mail servers would break backwards compatibility and is therefore not considered a viable option since it could seriously disrupt mail delivery across the internet.
 * By default mail servers do not validate the authenticity of another mail server's certificate; any random certificate is accepted (see [RFC 3207](https://tools.ietf.org/html/rfc3207)).
     - It was unclear which CAs to trust when validating the certificate for a given destination.
     - In MTA-to-MTA SMTP, server hostnames for the destination domain are obtained indirectly via DNS MX lookups, but, without DNSSEC, these names cannot be trusted.  As a result, it was unclear which names to verify in the certificate.
-* As as result, even when STARTTLS is used, a man in the middle attacker can intercept the traffic with any certificate of his choice.
 
-DANE addresses these shortcomings because:
-* The operator of the receiving mail server is obligated to ensure that any published TLSA records at all times match the server's certificate chain, and that STARTTLS is enabled and working.
-* This allows sending mail servers to unconditionally require STARTTLS with a matching certificate chain. Otherwise, the sending mail server aborts the connection and tries another server or defers the message.
-* Receiving servers with published TLSA records, are therefore no longer vulnerable to "STARTTLS stripping".
+As as result, even when STARTTLS is used, a man in the middle attacker:
+* can strip the STARTTLS capability send by the receiving mail server because this communication takes place without the use of encryption. 
+* can insert any certificate of his choice in the in the unencrypted communication and use it to intercept the traffic.
 
-## Advantages of DANE explained by illustrations
-### Mail delivery: TLS without DANE
-The illustration below shows two TLS capable e-mail servers without using DANE.
+## DANE addresses these risks
+The risks of SMTP with opportunistic TLS can be mitigated by using DANE:
+* The presence of a DNS TLSA record for the receiving domain's mail server, should be interpreted by the sending mail server as the capability to use TLS. The use of TLS can therefore be forced when communicating with the receiving domain's mail server.
+* The operator of the receiving domain's mail server is obligated to ensure that any published TLSA records at all times match the server's certificate chain, and that STARTTLS is enabled and working. This makes it possible for the sending domain's mail server to validate the certificate offered by the receiving domain's mail server.
+
+In short: DANE allows sending mail servers to unconditionally require STARTTLS with a matching certificate chain. Otherwise, the sending mail server aborts the connection and tries another server or defers the message. Receiving servers with published TLSA records, are therefore no longer vulnerable to the afore mentioned man in the middle attacks.
+
+# Advantages of DANE explained by illustrations
+## Mail delivery: TLS without DANE
+The illustration below shows two TLS capable mail servers without using DANE. This scenario exposes the mail transport to the risks described above.
+
 ![](dane-example-1-no-dane.png)
 
-### Mail delivery: TLS with MITM using evil certificate 
-The illustration below shows what happens when an attacker performs a man in the middle (MITM) attack and inserts its own certificate into the connection process.
-![](dane-example-1-evilcert.png)
-
-### Mail delivery: TLS with MITM stripping TLS 
+## Mail delivery: TLS with MITM stripping TLS 
 The illustration below shows what happens when an attacker performs a man in the middle (MITM) attack and forces an unsecure connection by stripping the TLS capability from the receiving e-mail server. 
+
+* When an attacker controls the network communication between the sending and receiving server it may downgrade the session by removing the information that indicates the receiving server supports encrypted transport. The sending server would proceed and transport the message unencrypted making all data contained in the message visible to the attacker.
+
 ![](dane-example-1-striptls.png)
 
-### Mail delivery: TLS with DANE
+## Mail delivery: TLS with MITM using evil certificate 
+The illustration below shows what happens when an attacker performs a man in the middle (MITM) attack and inserts its own certificate into the connection process.
+
+* Traditional SMTP protocol design does not offer any means for a sending server to automatically verify it communicates with the right server. As a result an attacker may fool the sending server to hand over the message to a server under the attackers control. This is called a man-in-the-middle attack, because the attacker places the bad server between the sending and the good receiving server.
+* To accieve this the attacker would configure the bad server to identify as the good receiving server. It would even use a TLS certificate that identifies with the name of the good server. The attacker would then poison the sending servers DNS telling it to go to the bad server whenever it wants to send messages to the good one. The fooled server would hand over all messages to the man-in-the-middle server.
+
+![](dane-example-1-evilcert.png)
+
+## Mail delivery: TLS with DANE
 The illustration below shows how the use of DANE can protect against man in the middle (MITM) attacks by addressing the shortcomings of TLS without DANE.
+
+* The operator of the receiving server publishes a TLSA record in its DNSSEC signed zone. The mere existence of the record indicates to the sending server that the recieving server **must** offer STARTTLS. Otherwise transport must not take place.
+* The receiving server's TLSA record contains policy information and a string that identifies the correct certificate. Only the good servers certiciate will match these verification criteria. Unless the attacker is also in possesion of the good servers certificate it cannot disguise as good and the man-in-the-middle server will be detected. It the verification data does not match the servers certificate the sending server will not transport the message.
+
 ![](dane-example-1-with-dane.png)
 
-### Mail delivery: TLS with DANE without DNSSEC
+## Mail delivery: TLS with DANE without DNSSEC
 Although guaranteeing reliable DNS resolving is actually an advantage of DNSSEC, it is still worth mentioning here. Notice that in the example above (TLS with DANE) the lack of DNSSEC would make it possible for an attacker to alter DNS responses (2 and 4). Such an attack can be used to trick the sender into sending e-mail to a rogue e-mail server. 
 
 # Reliable certificate rollover
-It is a good practice to replace certificates and keys from time to time, but this need not and should not disrupt email delivery even briefly.
-* Since a single TLSA record is tied to a particular certificate or (public) key, the TLSA records that match a server's certificate chain also change from time to time.
-* Because TLSA records are cached by DNS clients, the TLSA records that match a new certificate chain need to be published some time prior to its deployment.
-* But then the new TLSA records will be seen by some clients before the corresponding certificates are in place.
-* An outage is avoided by publishing **two** sets of TLSA records:
-    - Legacy TLSA records that continue to match the old certificate chain until it is replaced.
-    - Fresh TLSA records that will match the new new certificate chain once it is deployed.
-* Both are published together long enough to ensure that nobody should still caching only the legacy records. 
-* When the new certificate chain is deployed, tested and if all is well, the legacy TLSA records are dropped.
+A TLSA record identifies a certificate. If the certificate is exchanged for a new one also the associated TLSA record needs to be updated. Otherwise there will be a mismatch, verification will fail and DANE aware servers will not send messages to the receivers domain.
+
+Usually this creates the intent not to exchange the certificate at all. But this collides with best-practices to replace crytographic material – certificates and keys – from time to time.
+  
+To satisfy both requirements establish these maintenance procedures:
+* DANE allows to publish multiple TLSA records. As long as one matches the receving servers certificates everything is fine. Publish **two** sets of TLSA records like this:
+  * One TLSA record matching the certificate currently in use.
+  * A second TLSA record matching a fallback or future certificate to be used.
+* Wait two rounds of **TTL** before you start using a new certicate. This allows clients to clear their DNS cache and pick up the new TLSA record.
+* Once the new certificate has been deployed, tested and all is well, the legacy TLSA records may be dropped. Notice that removing the legacy TLSA record too soon can cause an outage. 
 
 Two ways of handling certificate rollover are known to work well, in combination with automated monitoring to ensure that the TLSA records and certificates are always current and correct.
 

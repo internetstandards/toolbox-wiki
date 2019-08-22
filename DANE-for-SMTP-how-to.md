@@ -2,11 +2,14 @@
 - [Introduction](#introduction)
 - [What is DANE?](#what-is-dane-)
 - [Why use DANE for SMTP?](#why-use-dane-for-smtp-)
-  * [Advantages of DANE explained by illustrations](#advantages-of-dane-explained-by-illustrations)
-    + [Mail delivery: TLS without DANE](#mail-delivery--tls-without-dane)
-    + [Mail delivery: TLS with MITM using evil certificate](#mail-delivery--tls-with-mitm-using-evil-certificate)
-    + [Mail delivery: TLS with MITM stripping TLS](#mail-delivery--tls-with-mitm-stripping-tls)
-    + [Mail delivery: TLS with DANE](#mail-delivery--tls-with-dane)
+  * [Risks of SMTP with opportunistic TLS](#risks-of-smtp-with-opportunistic-tls)
+  * [DANE addresses these risks](#dane-addresses-these-risks)
+- [Advantages of DANE explained by illustrations](#advantages-of-dane-explained-by-illustrations)
+  * [Mail delivery: TLS without DANE](#mail-delivery--tls-without-dane)
+  * [Mail delivery: TLS with MITM stripping TLS](#mail-delivery--tls-with-mitm-stripping-tls)
+  * [Mail delivery: TLS with MITM using evil certificate](#mail-delivery--tls-with-mitm-using-evil-certificate)
+  * [Mail delivery: TLS with DANE](#mail-delivery--tls-with-dane)
+  * [Mail delivery: TLS with DANE without DNSSEC](#mail-delivery--tls-with-dane-without-dnssec)
 - [Reliable certificate rollover](#reliable-certificate-rollover)
   * [Current + next details](#current---next-details)
 - [Tips, tricks and notices for implementation](#tips--tricks-and-notices-for-implementation)
@@ -36,6 +39,7 @@
     + [Logging](#logging)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
 
 
 # Executive Summary

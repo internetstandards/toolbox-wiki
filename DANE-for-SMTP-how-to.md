@@ -399,3 +399,16 @@ Connection is now using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits) (D
 Successful delivery to <danedomain@example.nl> (retry 0) in 2.108s: 2.0.0 example.org accepted message 0123456789ABCD
 Deleting mail file (all recipients done)
 ```
+
+# Special thanks
+Our infinite gratitude goes out to the following people for their support in building this how-to for DANE.
+
+Alexander Brotman  
+Anders Berggren  
+Marc van de Geijn  
+Mark Scholten  
+Patrick Koetter  
+Simon Besteman  
+Tom van Leeuwen  
+Viktor Dukhovni  
+Wido Potters  

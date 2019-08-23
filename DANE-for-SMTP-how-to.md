@@ -1,5 +1,15 @@
-- [Executive Summary](#executive-summary)
-- [Introduction](#introduction)
+#DANE for SMTP how-to
+This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DANE for SMTP.
+
+# Executive Summary
+* DANE is a best-practice technology for securing the transfer of email (SMTP) between organizations across the public Internet.
+* Successful DANE deployments require additional operational discipline.
+    - Automated monitoring of your own email servers and related DNS records is a must.
+    - Robust automation of coordinated DNS and email server certificate chain updates.
+    - These topics will be covered in more detail in this how-to.
+* Please plan carefully and then deploy DANE for your email servers. Botched deployments not not only harm the domain in question, but also have a deterrent effect on adoption by others.
+
+# Table of contents
 - [What is DANE?](#what-is-dane-)
 - [Why use DANE for SMTP?](#why-use-dane-for-smtp-)
   * [Risks of SMTP with opportunistic TLS](#risks-of-smtp-with-opportunistic-tls)
@@ -39,19 +49,6 @@
     + [Logging](#logging)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
-
-
-
-# Executive Summary
-* DANE is a best-practice technology for securing the transfer of email (SMTP) between organizations across the public Internet.
-* Successful DANE deployments require additional operational discipline.
-    - Automated monitoring of your own email servers and related DNS records is a must.
-    - Robust automation of coordinated DNS and email server certificate chain updates.
-    - These topics will be covered in more detail below.
-* Please plan carefully and then deploy DANE for your email servers. Botched deployments not not only harm the domain in question, but also have a deterrent effect on adoption by others.
-
-# Introduction
-This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DANE for SMTP.
 
 # What is DANE?
 DANE is short for "**D**NS-based **A**uthentication of **N**amed **E**ntities" and is described in [RFC 6698](https://tools.ietf.org/html/rfc6698) and [RFC 7671](https://tools.ietf.org/html/rfc7671). DANE establishes a downgrade-resistant method to verify an SMTP servers identity **before** it starts to transport an email message over a STARTTLS encrypted layer. In order to achieve this it uses verification information retrieved from the recipients DNSSEC signed DNS zone. DANE does not rely on additional trusted parties outside the delegation chain in DNS.

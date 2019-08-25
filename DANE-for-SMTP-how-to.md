@@ -47,6 +47,7 @@ This how-to is created by the Dutch Internet Standards Platform (the organizatio
     + [Transport Label](#transport-label)
     + [Scripting](#scripting)
     + [Logging](#logging)
+- [Special thanks](#special-thanks)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
@@ -151,6 +152,7 @@ Make sure that your servers support TLS 1.2, and offer STARTTLS to all clients, 
 # Tips, tricks and notices for implementation
 This section describes several pionts for attention when implementing DANE for SMTP. 
 
+* The TLSA record is used for the MX domain. So if your using another domain's nameserver, make sure to ask the administrator of that other domain to support DANE.
 * Make sure that DNSSEC is implemented properly. A lot of DANE breakage stems from receiving/recipient domains with broken DNSSEC implementation.
 * Purchasing of expensive certificates for mail server has no to little added value for the confidentiality since mail server don't validate certificates by default. Depending on the context there can be other advantages which makes organizations decide to use specific certificates.
 * It is recommended to use a certificates public key for generating a TLSA signature (selector type "1") instead of the full certificate (selector type "0"), because this enables the reuse of key materials. Notice that the use of Forward Secrecy decreases the need to use a new key-pair on every occasion. 

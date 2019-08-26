@@ -1,5 +1,5 @@
 # DANE for SMTP how-to
-This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DANE for SMTP.
+This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) in cooperation with industry experts (hosters and vendors) and is meant to provide practical information and guidance on implementing DANE for SMTP.
 
 # Executive Summary
 * DANE is a best-practice technology for securing the transfer of email (SMTP) between organizations across the public Internet.

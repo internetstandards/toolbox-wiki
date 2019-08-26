@@ -22,7 +22,7 @@ This how-to is created by the Dutch Internet Standards Platform (the organizatio
   * [Mail delivery: TLS with DANE](#mail-delivery--tls-with-dane)
   * [Mail delivery: TLS with DANE without DNSSEC](#mail-delivery--tls-with-dane-without-dnssec)
 - [Reliable certificate rollover](#reliable-certificate-rollover)
-  * [Current + next details](#current---next-details)
+  * [Points of attention when rolling over using "current + next"](#points-of-attention-when-rolling-over-using--current---next-)
 - [Tips, tricks and notices for implementation](#tips--tricks-and-notices-for-implementation)
 - [Inbound e-mail traffic (publishing DANE DNS records)](#inbound-e-mail-traffic--publishing-dane-dns-records-)
   * [Generating DANE records](#generating-dane-records)

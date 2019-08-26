@@ -155,7 +155,7 @@ This section describes several pionts for attention when implementing DANE for S
 
 * DANE is meant to be used for the MX domain. So if you are using another domain's mail server, make sure to ask the administrator of that domain to support DANE by setting up a TLSA record.
 * Make sure that DNSSEC is implemented properly. A lot of DANE breakage stems from receiving/recipient domains with broken DNSSEC implementation.
-* Purchasing of expensive certificates for mail server has no to little added value for the confidentiality since mail server don't validate certificates by default. Depending on the context there can be other advantages which makes organizations decide to use specific certificates.
+* Purchasing of expensive certificates for mail servers has no to little added value for the confidentiality since mail servers don't validate certificates by default. Depending on the context there can be other advantages which makes organizations decide to use specific certificates.
 * It is recommended to use a certificates public key for generating a TLSA signature (selector type "1") instead of the full certificate (selector type "0"), because this enables the reuse of key materials. Notice that the use of Forward Secrecy decreases the need to use a new key-pair on every occasion. 
 * An issuer certificate (usage type "2") validates only when the full certificate chain is offered by the receiving mail server. 
 * Mail servers don't validate certificates and therefore don't have their own certificate store. That's why DANE for SMTP only supports usage type "2" (DANE-TA) and usage type "3" (DANE-EE). Usage type "0" (PKIX-TA) and usage type "1" (PKIX-EE) are not supported. 

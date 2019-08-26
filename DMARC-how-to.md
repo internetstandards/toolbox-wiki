@@ -31,13 +31,71 @@ ruf: forensic reports
 | DMARC configuration tag | Required? | Value(s) | Explanation |
 | ---  | --- |  --- | --- |
 | v | mandatory | DMARC1; | |
-| p | mandatory | none<br>quaritine<br>reject | |
-| rua | optional | rua@example.nl | This field contains an e-mail address |
-| ruf | optional |ruf@example.nl | This field contains an e-mail address |
-| fo | mandatory | 0<br>1<br>s<br>d | reporting oprions for |
-| adkim | optional | s<br>r | |
-| aspf | optional | s<br>r | |
-| pct | optional | | |
+| p | mandatory | none<br>quaritine<br>reject | None: don't do anything if DMARC verification fails (used for testing)<br>quarantine: treat mail that fails DMARC check as suspicious<br>reject: reject mail that fail DMARC check |
+| rua | optional | rua@example.nl | This field contains the e-mail address used to send aggregate reports to |
+| ruf | optional |ruf@example.nl | This field contains the e-mail address used to send forensic reports to |
+| fo | mandatory | <br>0<br>1<br>s<br>d | Reporting options for failure reports. Generates a report if:<br>- both SPF and DKIM tests fail (0)<br>- either SPF or DKIM test fail (1)<br>- SPF test fails (s)<br>- DKIM test fails (d) |
+| adkim | optional | s<br>r | Controls how strict the result of DKIM verification should be intepreted. Strict or relaxed. |
+| aspf | optional | s<br>r | Controls how strict the result of SPF verification should be intepreted. Strict or relaxed. |
+| pct | optional | 0..100 | Determine percentage of mail from your domain to have the DMARC verificaton done by other mail providers. Default is 100. |
 | rf | optional | | |
 | ri | optional | | |
 | sp | optional | | |
+
+# Reporting
+to-do
+
+# Implementing DKIM with OpenDKIM for Postfix with SpamAssassin
+**Specifics for this setup**
+* Linux Debian 9.8 (Stretch) 
+* Postfix 3.4.5
+* BIND 9.10.3-P4-Debian
+* OpenDMARC v1.3.2
+
+**Assumptions**
+* DNSSEC is used
+* Mail server is operational
+* Software packages are already installed
+
+## Outbound e-mail traffic
+DMARC for outbound e-mail traffic can be accomplished by publishing a DMARC policy as a TXT record in a domain name's DNS zone.
+
+## Inbound e-mail traffic
+DMARC for inbound e-mail traffic can be accomplished by setting up OpenDMARC and integrate it with Postfix.
+
+### Set up OpenDMARC
+Make sure the file **/etc/opendmarc.conf** has a least the following configuration options.
+
+    AuthservID mail.example.nl
+    PidFile /var/run/opendmarc/opendmarc.pid
+    RejectFailures false
+    Syslog true
+    TrustedAuthservIDs mail.example.nl,mail2.example.nl,localhost,127.0.0.1
+    UMask 0002
+    UserID opendmarc:opendmarc
+    IgnoreAuthenticatedClients true
+    IgnoreHosts /etc/opendmarc/ignore.hosts
+    HistoryFile /var/run/opendmarc/opendmarc.dat
+    Socket inet:54321@localhost
+
+Make sure the file **/etc/opendmarc/ignore.hosts** contains all hosts that you trust. The e-mail coming from these hosts will not be checked by OpenDMARC:
+
+    127.0.0.1
+    localhost
+
+Make sure the default file **/etc/default/opendmarc** contains:
+
+    RUNDIR=/var/run/opendmarc
+    SOCKET=inet:54321@localhost
+    USER=opendmarc
+    GROUP=opendmarc
+    PIDFILE=$RUNDIR/opendmarc.pid
+
+### Integrate with Postfix
+Now we need to tell Postfix to use OpenDMARC as a mail filter in order to use its functionality. This is done by making sure that **/etc/postfix/main.cf** contains the configuration values as listed below. Notice that the DKIM check (localhost:12301) is done _before_ DMARC (localhost:54321) since DMARC relies on the DKIM results.
+
+    smtpd_milters = inet:localhost:12301,inet:localhost:54321
+    non_smtpd_milters = inet:localhost:12301,inet:localhost:54321
+
+### Set up reporting
+to-do

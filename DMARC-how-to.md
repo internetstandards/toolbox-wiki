@@ -64,7 +64,7 @@ DMARC for outbound e-mail traffic can be accomplished by publishing a DMARC poli
 DMARC for inbound e-mail traffic can be accomplished by setting up OpenDMARC and integrate it with Postfix.
 
 ### Set up OpenDMARC
-Make sure the file **/etc/opendmarc.conf** has a least the following configuration options.
+Make sure the file **/etc/opendmarc.conf** has a least the following configuration parameters.
 
     AuthservID mail.example.nl
     PidFile /var/run/opendmarc/opendmarc.pid
@@ -77,6 +77,8 @@ Make sure the file **/etc/opendmarc.conf** has a least the following configurati
     IgnoreHosts /etc/opendmarc/ignore.hosts
     HistoryFile /var/run/opendmarc/opendmarc.dat
     Socket inet:54321@localhost
+
+For more information about these configuration parameters, take a look at [its man page](https://manpages.debian.org/unstable/opendmarc/opendmarc.conf.5.en.html).
 
 Make sure the file **/etc/opendmarc/ignore.hosts** contains all hosts that you trust. The e-mail coming from these hosts will not be checked by OpenDMARC:
 
@@ -92,7 +94,7 @@ Make sure the default file **/etc/default/opendmarc** contains:
     PIDFILE=$RUNDIR/opendmarc.pid
 
 ### Integrate with Postfix
-Now we need to tell Postfix to use OpenDMARC as a mail filter in order to use its functionality. This is done by making sure that **/etc/postfix/main.cf** contains the configuration values as listed below. Notice that the DKIM check (localhost:12301) is done _before_ DMARC (localhost:54321) since DMARC relies on the DKIM results.
+Now we need to tell Postfix to use OpenDMARC as a mail filter in order to use its functionality. This is done by making sure that **/etc/postfix/main.cf** contains the configuration parameters as listed below. Notice that the DKIM check (localhost:12301) is done _before_ DMARC (localhost:54321) since DMARC relies on the DKIM results.
 
     smtpd_milters = inet:localhost:12301,inet:localhost:54321
     non_smtpd_milters = inet:localhost:12301,inet:localhost:54321

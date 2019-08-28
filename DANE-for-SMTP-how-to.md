@@ -82,6 +82,9 @@ The risks of SMTP with opportunistic TLS can be mitigated by using DANE:
 
 In short: DANE allows sending mail servers to unconditionally require STARTTLS with a matching certificate chain. Otherwise, the sending mail server aborts the connection and tries another server or defers the message. Receiving servers with published TLSA records, are therefore no longer vulnerable to the afore mentioned man in the middle attacks.
 
+# DANE TLSA record example
+![]()
+
 # Advantages of DANE explained by illustrations
 ## Mail delivery: TLS without DANE
 The illustration below shows two TLS capable mail servers without using DANE. This scenario exposes the mail transport to the risks described above.

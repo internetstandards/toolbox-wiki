@@ -93,7 +93,7 @@ In short: DANE allows sending mail servers to unconditionally require STARTTLS w
 0: fingerprint with regard to the full certificate  
 1: fingerprint with regard to the public key  
 
-**Matching type**: information about the hashing mechanism used for fingeeprint regarding this TLSA record.  
+**Matching-Type**: information about the hashing mechanism used for fingeeprint regarding this TLSA record.  
 0: no hasing, full information  
 1: SHA2-256 hash  
 2: SHA2-512 hash  

@@ -85,16 +85,18 @@ In short: DANE allows sending mail servers to unconditionally require STARTTLS w
 # DANE TLSA record example
 ![](DANE-example-TLSA-record.png)
 
-**Usage**: says something about the type of certificate that is used for this TLSA record. 
-2: intermediate / root certificate
-3: end-entity certificaat
-**Selector**: this is about the scope of the fingerprint regarding this TLSA record. 
-0: fingerprint with regard to the full certificate 
-1: fingerprint with regard to the public key
-**Matching type**: information about the hashing mechanism used for fingeeprint regarding this TLSA record.
-0: no hasing, full information
-1: SHA2-256 hash
-2: SHA2-512 hash
+**Usage**: says something about the type of certificate that is used for this TLSA record.  
+2: intermediate / root certificate  
+3: end-entity certificate  
+
+**Selector**: this is about the scope of the fingerprint regarding this TLSA record.  
+0: fingerprint with regard to the full certificate  
+1: fingerprint with regard to the public key  
+
+**Matching type**: information about the hashing mechanism used for fingeeprint regarding this TLSA record.  
+0: no hasing, full information  
+1: SHA2-256 hash  
+2: SHA2-512 hash  
 
 # Advantages of DANE explained by illustrations
 ## Mail delivery: TLS without DANE

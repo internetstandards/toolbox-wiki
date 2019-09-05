@@ -53,9 +53,9 @@ This how-to is created by the Dutch Internet Standards Platform (the organizatio
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
 # What is DANE?
-DANE is short for "**D**NS-based **A**uthentication of **N**amed **E**ntities" and is described in [RFC 6698](https://tools.ietf.org/html/rfc6698) and [RFC 7671](https://tools.ietf.org/html/rfc7671). DANE establishes a downgrade-resistant method to verify an SMTP servers identity **before** it starts to transport an email message over a STARTTLS encrypted layer. In order to achieve this it uses verification information retrieved from the recipients DNSSEC signed DNS zone. DANE does not rely on additional trusted parties outside the delegation chain in DNS.
+DANE is short for "**D**NS-based **A**uthentication of **N**amed **E**ntities" and is described in [RFC 6698](https://tools.ietf.org/html/rfc6698) with "updates and operational guidance" in [RFC 7671](https://tools.ietf.org/html/rfc7671). DANE establishes a downgrade-resistant method to verify an SMTP servers identity **before** it starts to transport an email message over a STARTTLS encrypted layer. In order to achieve this it uses verification information retrieved from the recipients DNSSEC signed DNS zone. DANE does not rely on additional trusted parties outside the delegation chain in DNS.
 
-DANE, as a method, has been designed to work with any TLS service. DANE for SMTP (which is described in [RFC 7672](https://tools.ietf.org/html/rfc7672) implements the DANE method for SMTP. It is used increasingly and adds active attack (man-in-the-middle) resistance to SMTP transport encryption [RFC 7672 Section 1.3](https://tools.ietf.org/rfc7672#section-1.3). DANE for SMTP uses the presence of DNS TLSA ressource records to **securely signal TLS support** and to publish the means by which SMTP clients can successfully **authenticate legitimate SMTP servers**. The result is called "opportunistic DANE TLS", and resists downgrade and man-in-the-middle (MITM) attacks when the destination domain and its MX hosts are DNSSEC signed, and TLSA records are published for each MX host. While possible, DANE for HTTP is not presently supported by the major browsers and so has seen little deployment.
+DANE, as a method, has been designed to work with any TLS service. DANE for SMTP (which is described in [RFC 7672](https://tools.ietf.org/html/rfc7672)) implements the DANE method for SMTP. It is used increasingly and adds active attack (man-in-the-middle) resistance to SMTP transport encryption [RFC 7672 Section 1.3](https://tools.ietf.org/rfc7672#section-1.3). DANE for SMTP uses the presence of DNS TLSA ressource records to **securely signal TLS support** and to publish the means by which SMTP clients can successfully **authenticate legitimate SMTP servers**. The result is called "opportunistic DANE TLS", and resists downgrade and man-in-the-middle (MITM) attacks when the destination domain and its MX hosts are DNSSEC signed, and TLSA records are published for each MX host. While possible, DANE for HTTP is not presently supported by the major browsers and so has seen little deployment.
 
 # Why use DANE for SMTP?
 At this time it is not possible to require **mandatory** transport encryption (TLS) in public mail transport. A mail server might not support transporting messages using encryption. Today only plaintext or **opportunistic** transport encryption are applicable – opportunistic because it is up to the receiving server to decide if it wants to and is able to send messages using TLS (via STARTTLS).
@@ -87,7 +87,7 @@ In short: DANE allows sending mail servers to unconditionally require STARTTLS w
 
 **Usage**: says something about the type of certificate that is used for this TLSA record.  
 2: intermediate / root certificate  
-3: end-entity certificate  
+3: end-entity certificate (also called 'host certificate' or 'server certificate')
 
 **Selector**: this is about the scope of the fingerprint regarding this TLSA record.  
 0: fingerprint with regard to the full certificate  
@@ -165,6 +165,9 @@ This section describes several pionts for attention when implementing DANE for S
 * DANE is meant to be used for the MX domain. So if you are using another domain's mail server, make sure to ask the administrator of that domain to support DANE by setting up a TLSA record.
 * Make sure that DNSSEC is implemented properly. A lot of DANE breakage stems from receiving/recipient domains with broken DNSSEC implementation.
 * Purchasing of expensive certificates for mail servers has no to little added value for the confidentiality since mail servers don't validate certificates by default. Depending on the context there can be other advantages which makes organizations decide to use specific certificates.
+  * It is possible to use self-signed certificates. 
+  * [Section 3.2 of RFC 7672](https://tools.ietf.org/html/rfc7672#section-3.2) states that SMTP clients must **not** perform certificate name checks when using an end-entity certificate (usage type 3), but must perform certificate name checks when using an intermediate or root certificate (usage type 2). 
+  * [Section 3.1 of RFC 7672](https://tools.ietf.org/html/rfc7672#section-3.1) states that the expiration date of the end-entity certificate MUST be ignored.
 * It is recommended to use a certificates public key for generating a TLSA signature (selector type "1") instead of the full certificate (selector type "0"), because this enables the reuse of key materials. Notice that the use of Forward Secrecy decreases the need to use a new key-pair on every occasion. 
 * An issuer certificate (usage type "2") validates only when the full certificate chain is offered by the receiving mail server. 
 * Mail servers don't validate certificates and therefore don't have their own certificate store. That's why DANE for SMTP only supports usage type "2" (DANE-TA) and usage type "3" (DANE-EE). Usage type "0" (PKIX-TA) and usage type "1" (PKIX-EE) are not supported. 

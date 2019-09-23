@@ -88,7 +88,7 @@ The risks of SMTP with opportunistic TLS can be mitigated by using DANE:
 In short: DANE allows sending mail servers to unconditionally require STARTTLS with a matching certificate chain. Otherwise, the sending mail server aborts the connection and tries another server or defers the message. Receiving servers with published TLSA records, are therefore no longer vulnerable to the afore mentioned man in the middle attacks.
 
 # DANE TLSA record example
-![](DANE-example-TLSA-record.png)
+![](images/DANE-example-TLSA-record.png)
 
 **Usage**: says something about the type of certificate that is used for this TLSA record.  
 2: intermediate / root certificate  
@@ -107,14 +107,14 @@ In short: DANE allows sending mail servers to unconditionally require STARTTLS w
 ## Mail delivery: TLS without DANE
 The illustration below shows two TLS capable mail servers without using DANE. This scenario exposes the mail transport to the risks described above.
 
-![](dane-example-1-no-dane.png)
+![](images/dane-example-1-no-dane.png)
 
 ## Mail delivery: TLS with MITM stripping TLS 
 The illustration below shows what happens when an attacker performs a man in the middle (MITM) attack and forces an unsecure connection by stripping the TLS capability from the receiving e-mail server. 
 
 * When an attacker controls the network communication between the sending and receiving server it may downgrade the session by removing the information that indicates the receiving server supports encrypted transport. The sending server would proceed and transport the message unencrypted making all data contained in the message visible to the attacker.
 
-![](dane-example-1-striptls.png)
+![](images/dane-example-1-striptls.png)
 
 ## Mail delivery: TLS with MITM using evil certificate 
 The illustration below shows what happens when an attacker performs a man in the middle (MITM) attack and inserts its own certificate into the connection process.
@@ -122,7 +122,7 @@ The illustration below shows what happens when an attacker performs a man in the
 * Traditional SMTP protocol design does not offer any means for a sending server to automatically verify it communicates with the right server. As a result an attacker may fool the sending server to hand over the message to a server under the attackers control. This is called a man-in-the-middle attack, because the attacker places the bad server between the sending and the good receiving server.
 * To accieve this the attacker would configure the bad server to identify as the good receiving server. It would even use a TLS certificate that identifies with the name of the good server. The attacker would then poison the sending servers DNS telling it to go to the bad server whenever it wants to send messages to the good one. The fooled server would hand over all messages to the man-in-the-middle server.
 
-![](dane-example-1-evilcert.png)
+![](images/dane-example-1-evilcert.png)
 
 ## Mail delivery: TLS with DANE
 The illustration below shows how the use of DANE can protect against man in the middle (MITM) attacks by addressing the shortcomings of TLS without DANE.
@@ -130,7 +130,7 @@ The illustration below shows how the use of DANE can protect against man in the 
 * The operator of the receiving server publishes a TLSA record in its DNSSEC signed zone. The mere existence of the record indicates to the sending server that the recieving server **must** offer STARTTLS. Otherwise transport must not take place.
 * The receiving server's TLSA record contains policy information and a string that identifies the correct certificate. Only the good servers certiciate will match these verification criteria. Unless the attacker is also in possesion of the good servers certificate it cannot disguise as good and the man-in-the-middle server will be detected. It the verification data does not match the servers certificate the sending server will not transport the message.
 
-![](dane-example-1-with-dane.png)
+![](images/dane-example-1-with-dane.png)
 
 ## Mail delivery: TLS with DANE without DNSSEC
 Although guaranteeing reliable DNS resolving is actually an advantage of DNSSEC, it is still worth mentioning here. Notice that in the example above (TLS with DANE) the lack of DNSSEC would make it possible for an attacker to alter DNS responses (2 and 4). Such an attack can be used to trick the sender into sending e-mail to a rogue e-mail server. 

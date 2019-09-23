@@ -7,7 +7,6 @@ This how-to is created by the Dutch Internet Standards Platform (the organizatio
 DMARC is short for **D**omain based **M**essage **A**uthentication, **R**eporting and **C**onformance and is described in [RFC 7489](https://tools.ietf.org/html/rfc7489). With DMARC the owner of a domain can, by means of a DNS record, publish a  policy that states how to handle e-mail (deliver, quarantine, reject) which is not properly authenticated using SPF and/or DKIM. 
 
 At the same time DMARC also provides the means for receiving reports which allows a domain's administrator to detect whether their domainname is used for phishing or spam. 
-
  
 # Why use DMARC?
 Before DMARC, organizations already took several measures to determine the authenticity of an e-mail (like SPF and DKIM) to reduce the received amount of SPAM to a minimum. This is basically a good thing, but if these measures fail to choose whether or not an email is SPAM with a high level of certainty, the choice is redirected to the addressee (receiving party). This methodology is prone to abuse, since users are generally not equiped with the knowledge and/or means to classify incoming emails. 
@@ -25,7 +24,7 @@ DMARC addresses this problem and enables the owner of a domain to take explicit 
   * There is a workaround: Forward the appointment as an "iCalendar file" or as an attachment. 
 
 # Creating a DMARC record
-The DMARC policy is published by means of DNS TXT record.
+The DMARC policy is published by means of a DNS TXT record.
 Overview 
 
 rua: aggregate reports
@@ -41,16 +40,13 @@ ruf: forensic reports
 | adkim | optional | s<br>r | Controls how strict the result of DKIM verification should be intepreted. Strict or relaxed. |
 | aspf | optional | s<br>r | Controls how strict the result of SPF verification should be intepreted. Strict or relaxed. |
 | pct | optional | 0..100 | Determine percentage of mail from your domain to have the DMARC verificaton done by other mail providers. Default is 100. |
-| rf | optional | | |
-| ri | optional | | |
-| sp | optional | | |
+| rf | optional | afrf<br>aodef | Preferred reporting format for forensic reports. Default is afrf. |
+| ri | optional | 60..86400 | Interval (in seconds) at which you want to receive DMARC reports. The DMARC RFC specifies that organizations should be able to send reports at least once every day (86400 seconds) and also states a minimum interval of one hour (60 seconds). Default is 86400. |
+| sp | optional | none<br>quarantine<br>reject |  Subdomain policy. If not set the policy defined under "p=" will apply to all your subdomains. |
 
 Be aware that implementing a DMARC record without a rua configuration is possible, this is not advised because the DMARC XML files that are received by implementing a rua email address can help with implementing DKIM or SPF to meet the DMARC requirements.
 
-# Reporting
-to-do
-
-# Implementing DKIM with OpenDKIM for Postfix with SpamAssassin
+# Implementing DMARC with OpenDMARC for Postfix with SpamAssassin
 **Specifics for this setup**
 * Linux Debian 9.8 (Stretch) 
 * Postfix 3.4.5
@@ -105,8 +101,40 @@ Now we need to tell Postfix to use OpenDMARC as a mail filter in order to use it
     non_smtpd_milters = inet:localhost:12301,inet:localhost:54321
 
 ### Set up reporting
-to-do
+In order to become DMARC compliant, we need to start sending aggregate DMARC reports. Let's start by creating an OpenDMARC database using the provided MySQL script (/usr/share/doc/opendmarc/schema.mysql) in the OpenDMARC package.  
 
+In the example below the user root is used to create the new "opendmarc" database. If you would also like to create a user with access to the database, then uncomment the last two lines in the MySQL script and make sure to change the default 'changeme' password into something strong.
+
+    mysql -u root -p < /usr/share/doc/opendmarc/schema.mysql
+
+After creation of the database, you need to create an executable Bash script in order to be able to send out reports. Create the file **/etc/opendmarc/report_script** and use the following content:
+
+```
+#!/bin/bash
+ 
+DB_SERVER='database.example.nl'
+DB_USER='opendmarc'
+DB_PASS='somethingstrong'
+DB_NAME='opendmarc'
+WORK_DIR='/var/run/opendmarc'
+REPORT_EMAIL='dmarc@example.nl'
+REPORT_ORG='Example Company (example.nl)'
+ 
+mv ${WORK_DIR}/opendmarc.dat ${WORK_DIR}/opendmarc_import.dat -f
+cat /dev/null > ${WORK_DIR}/opendmarc.dat
+ 
+/usr/sbin/opendmarc-import --dbhost=${DB_SERVER} --dbuser=${DB_USER} --dbpasswd=${DB_PASS} --dbname=${DB_NAME} --verbose < ${WORK_DIR}/opendmarc_import.dat
+/usr/sbin/opendmarc-reports --dbhost=${DB_SERVER} --dbuser=${DB_USER} --dbpasswd=${DB_PASS} --dbname=${DB_NAME} --verbose --interval=86400 --report-email $REPORT_EMAIL --report-org $REPORT_ORG
+```
+
+Make sure the script is executable
+
+    chmod +x /etc/opendmarc/report_script
+    
+and run it every day under the user opendmarc by adding the following to **/etc/crontab**:
+
+    1 0 * * * opendmarc /etc/opendmarc/report_script
+    
 # Special thanks
 Our infinite gratitude goes out to the following people for their support in building this how-to for DANE.
 

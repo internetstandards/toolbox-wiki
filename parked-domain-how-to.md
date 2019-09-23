@@ -8,7 +8,7 @@ Explicitly configure an 'empty' MX record according to [RFC7505 ](https://tools.
 
 # DMARC
 
-`DMARC p=reject`
+`_dmarc IN TXT "v=DMARC1; p=reject; rua=mailto:rua@example.nl; ruf=mailto:ruf@example.nl`
 
 # DKIM
 

@@ -16,8 +16,9 @@ DMARC addresses this problem and enables the owner of a domain to take explicit 
 
 # Tips, tricks and notices for implementation
 * Interoperabily issues: https://tools.ietf.org/html/rfc7960
-* DMARC does not require both DKIM or SPF. 
-* Parked domain: “DMARC p=reject”. Make sure to include rua and ruf addresses, since this allows monitoring of possible abuse attempts.
+* DMARC does not require both DKIM or SPF. But implementation of both is strongly advised.
+* DMARC is about aligning the DKIM and/or SPF domain with the organizational domain in the From header.
+* Parked domain: “DMARC p=reject”. Make sure to include rua and ruf addresses, since this allows monitoring of possible abuse attempts. Implement additional records (SPF, DKIM, NullMX) if possible, see also: https://www.m3aawg.org/sites/default/files/m3aawg_parked_domains_bp-2015-12.pdf
 * RFC 7489 [states](https://tools.ietf.org/html/rfc7489#section-6.4) that the tags dmarc-version ("v=") and dmarc-request ("p=") should be on the first and second position of the DMARC record. The order of the other tags does not matter: "components other than dmarc-version and dmarc-request may appear in any order".
 * [Errata 5440 of RFC 7489](https://www.rfc-editor.org/errata_search.php?rfc=7489) states that a semicolon should be included in the DMARC version tag. Correct: "v=DMARC1;". Incorrect: "v=DMARC1". 
 * When using office 365, the forwarding of calendar appointments from a DMARC projected domain fails. This is a known issue. Read more on the [Office 365 UserVoice forum](https://office365.uservoice.com/forums/264636-general/suggestions/34012756-forwarding-of-calendar-appointments-from-a-dmarc-p) and don't forget to submit your vote! 
@@ -33,9 +34,9 @@ ruf: forensic reports
 | DMARC configuration tag | Required? | Value(s) | Explanation |
 | ---  | --- |  --- | --- |
 | v | mandatory | DMARC1; | |
-| p | mandatory | none<br>quaritine<br>reject | None: don't do anything if DMARC verification fails (used for testing)<br>quarantine: treat mail that fails DMARC check as suspicious<br>reject: reject mail that fail DMARC check |
-| rua | optional | rua@example.nl | This field contains the e-mail address used to send aggregate reports to |
-| ruf | optional |ruf@example.nl | This field contains the e-mail address used to send forensic reports to |
+| p | mandatory | none<br>quarantine<br>reject | None: don't do anything if DMARC verification fails (used for testing)<br>quarantine: treat mail that fails DMARC check as suspicious<br>reject: reject mail that fail DMARC check |
+| rua | optional | rua@example.nl | This field contains the email address used to send aggregate reports to |
+| ruf | optional |ruf@example.nl | This field contains the email address used to send forensic reports to |
 | fo | mandatory | <br>0<br>1<br>s<br>d | Reporting options for failure reports. Generates a report if:<br>- both SPF and DKIM tests fail (0)<br>- either SPF or DKIM test fail (1)<br>- SPF test fails (s)<br>- DKIM test fails (d) |
 | adkim | optional | s<br>r | Controls how strict the result of DKIM verification should be intepreted. Strict or relaxed. |
 | aspf | optional | s<br>r | Controls how strict the result of SPF verification should be intepreted. Strict or relaxed. |
@@ -43,6 +44,8 @@ ruf: forensic reports
 | rf | optional | | |
 | ri | optional | | |
 | sp | optional | | |
+
+Be aware that implementing a DMARC record without a rua configuration is possible, this is not advised because the DMARC XML files that are received by implementing a rua email address can help with implementing DKIM or SPF to meet the DMARC requirements.
 
 # Reporting
 to-do

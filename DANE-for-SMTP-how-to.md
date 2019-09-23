@@ -498,11 +498,11 @@ tls: cert: /C=NL/ST=Zuid-Holland/L=Den Haag/XXXXXXX; issuer=/C=NL/O=XXXXXXX; ver
 tls: DANE match: /C=NL/ST=Zuid-Holland/L=XXXXXX; issuer=XXXXX; depth=0
 ```
 
-
 # Special thanks
 Our infinite gratitude goes out to the following people for their support in building this how-to for DANE.
 
 Alexander Brotman  
+Alwin de Bruin  
 Anders Berggren  
 Marc van de Geijn  
 Mark Scholten  

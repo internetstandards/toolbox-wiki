@@ -1,4 +1,20 @@
 # Table of contents
+- [Introduction](#introduction)
+- [What is DMARC?](#what-is-dmarc-)
+- [Why use DMARC?](#why-use-dmarc-)
+- [Tips, tricks and notices for implementation](#tips--tricks-and-notices-for-implementation)
+- [Overview of DMARC configuration tags](#overview-of-dmarc-configuration-tags)
+- [Implementing DMARC with OpenDMARC for Postfix with SpamAssassin](#implementing-dmarc-with-opendmarc-for-postfix-with-spamassassin)
+  * [Outbound e-mail traffic](#outbound-e-mail-traffic)
+    + [Setting up a DMARC record](#setting-up-a-dmarc-record)
+  * [Inbound e-mail traffic](#inbound-e-mail-traffic)
+    + [Set up OpenDMARC](#set-up-opendmarc)
+    + [Integrate with Postfix](#integrate-with-postfix)
+    + [Set up reporting](#set-up-reporting)
+    + [Configuring SpamAssassin](#configuring-spamassassin)
+- [Special thanks](#special-thanks)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
 # Introduction
 This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DMARC.

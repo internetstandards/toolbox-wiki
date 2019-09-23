@@ -134,7 +134,7 @@ When you are ready to start using DKIM restart Postfix, but make sure you waited
 ### Configuring SpamAssassin
 SpamAssassin uses a scoring mechanism in order to determine if an e-mail should be considered spam. By default SpamAssassin considers an e-mail to be spam if the score at least "5". An e-mail starts with a score of 0 and points are added based on the [tests](https://spamassassin.apache.org/old/tests_3_3_x.html) performed. The tests performed can be configured by adding specific [configuration parameters](https://spamassassin.apache.org/full/3.4.x/doc/Mail_SpamAssassin_Conf.html) in **/etc/spamassassin/local.cf**.
 
-Now here's the tricky part. The points added to the score of an incoming e-mail based on the results of a specific test, is at its core a custom job. Many variables can be taken into consideration when scoring an e-mail (which is considered the strength of a post-SMTP spam filter) and the detailed scoring depends on a domain owner's specific wishes. For the sake of this how-to, the DKIM scoring will be based on the assumption that the domain owner wants to consider an e-mail to be spam if the sending e-mail server's IP-address or host is not in the domain's SPF record. 
+Now here's the tricky part. The points added to the score of an incoming e-mail based on the results of a specific test, is at its core a custom job. Many variables can be taken into consideration when scoring an e-mail (which is considered the strength of a post-SMTP spam filter) and the detailed scoring depends on a domain owner's specific wishes. For the sake of this how-to, the DKIM scoring will be based on the assumption that the domain owner wants to consider an e-mail to be spam if the sending e-mail server's DKIM signature is not valid.
 
 With SpamAssassin this can be configured by adding the following scoring configuration parameters to **/etc/spamassassin/local.cf**:
 
@@ -146,10 +146,10 @@ score DKIM_ADSP_DISCARD 5.0
 # No valid author signature, domain signs all mail and suggests discarding the rest 
 
 score DKIM_ADSP_NXDOMAIN 5.0
-# No valid author signature and domain not in DNS 
+# No valid author signature and from-domain does not exist 
 ```
 
 This means that incoming e-mail is instantly classificied as spam if there is not a valid DKIM signature in the mail header and:
 * the sending domain's DKIM ADSP record states that all e-mail should be signed and all unsigned mails should be discarded (DISCARD).
 * the sending domain's DKIM ADSP record states that all e-mail should be signed (ALL). 
-* the sending domain used in the "From"-header (a.k.a. RFC5322.From, Header From, Message From) does not exist. 
+* the domain used in the "From"-header (a.k.a. RFC5322.From, Header From, Message From) does not exist. 

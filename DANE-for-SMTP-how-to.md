@@ -15,6 +15,7 @@ This how-to is created by the Dutch Internet Standards Platform (the organizatio
 - [Why use DANE for SMTP?](#why-use-dane-for-smtp-)
   * [Risks of SMTP with opportunistic TLS](#risks-of-smtp-with-opportunistic-tls)
   * [DANE addresses these risks](#dane-addresses-these-risks)
+- [DANE TLSA record example](#dane-tlsa-record-example)
 - [Advantages of DANE explained by illustrations](#advantages-of-dane-explained-by-illustrations)
   * [Mail delivery: TLS without DANE](#mail-delivery--tls-without-dane)
   * [Mail delivery: TLS with MITM stripping TLS](#mail-delivery--tls-with-mitm-stripping-tls)
@@ -48,6 +49,10 @@ This how-to is created by the Dutch Internet Standards Platform (the organizatio
     + [Transport Label](#transport-label)
     + [Scripting](#scripting)
     + [Logging](#logging)
+- [Implementing DANE for SMTP on Port25 PowerMTA (outbound e-mail traffic)](#implementing-dane-for-smtp-on-port25-powermta--outbound-e-mail-traffic-)
+  * [Generic configuration](#generic-configuration-1)
+    + [Configure the use of DANE on the domain level](#configure-the-use-of-dane-on-the-domain-level)
+    + [Logging](#logging-1)
 - [Special thanks](#special-thanks)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>

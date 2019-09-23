@@ -23,10 +23,8 @@ DMARC addresses this problem and enables the owner of a domain to take explicit 
 * When using office 365, the forwarding of calendar appointments from a DMARC projected domain fails. This is a known issue. Read more on the [Office 365 UserVoice forum](https://office365.uservoice.com/forums/264636-general/suggestions/34012756-forwarding-of-calendar-appointments-from-a-dmarc-p) and don't forget to submit your vote! 
   * There is a workaround: Forward the appointment as an "iCalendar file" or as an attachment. 
 
-# Creating a DMARC record
-The DMARC policy is published by means of a DNS TXT record. Before setting up a DMARC record, lets first take a look at all the configuration tags that can be configured within a DMARC record.
-
-## Overview of DMARC configuration tag
+# Overview of DMARC configuration tags
+The DMARC policy is published by means of a DNS TXT record. A DMARC record can contain several configuration tags. The table below will list all configuration tags and explain their purpose.
 
 | DMARC configuration tag | Required? | Value(s) | Explanation |
 | ---  | --- |  --- | --- |
@@ -44,11 +42,6 @@ The DMARC policy is published by means of a DNS TXT record. Before setting up a 
 
 Be aware that implementing a DMARC record without a rua configuration is possible, this is not advised because the DMARC XML files that are received by implementing a rua email address can help with implementing DKIM or SPF to meet the DMARC requirements.
 
-## Setting up a DMARC record
-Depending on your preferences and needs, you can determine the value of the configuration tags. The values below seem like a good starting point when setting up
-
-    _dmarc IN TXT "v=DMARC1; p=quarantine; rua=mailto:dmarc@example.nl; ruf=mailto:dmarc@example.nl; fo=0; adkim=r; aspf=r; pct=100; rf=afrf; ri=86400; sp=quarantine"
-
 # Implementing DMARC with OpenDMARC for Postfix with SpamAssassin
 **Specifics for this setup**
 * Linux Debian 9.8 (Stretch) 
@@ -63,6 +56,13 @@ Depending on your preferences and needs, you can determine the value of the conf
 
 ## Outbound e-mail traffic
 DMARC for outbound e-mail traffic can be accomplished by publishing a DMARC policy as a TXT record in a domain name's DNS zone.
+
+### Setting up a DMARC record
+Depending on your preferences and needs, you can determine the value of the configuration tags. The values below seem like a good starting point when setting up DMARC.
+
+    _dmarc IN TXT "v=DMARC1; p=quarantine; rua=mailto:dmarc@example.nl; ruf=mailto:dmarc@example.nl; fo=0; adkim=r; aspf=r; pct=100; rf=afrf; ri=86400; sp=quarantine"
+    
+Because this specific setup uses SpamAssassin for classifying e-mail to be SPAM or legitimate (HAM), the DMARC policy used is quarantine. This is done to prevent OpenDMARC from blocking the e-mail and, as a result, not enabling SpamAssassin to do its job.
 
 ## Inbound e-mail traffic
 DMARC for inbound e-mail traffic can be accomplished by setting up OpenDMARC and integrate it with Postfix.

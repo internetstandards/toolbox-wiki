@@ -106,3 +106,8 @@ Now we need to tell Postfix to use OpenDMARC as a mail filter in order to use it
 
 ### Set up reporting
 to-do
+
+# Special thanks
+Our infinite gratitude goes out to the following people for their support in building this how-to for DANE.
+
+Alwin de Bruin  

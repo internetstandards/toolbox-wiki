@@ -371,6 +371,8 @@ Name servers: enter here your resolving nameservers.
 DNS cache: Enable (now the DNSSEC option is visible)
 DNSSEC: Enable
 
+![](images/halon-dnssec.png)
+
 If you have multiple hosts in a cluster, edit the DNS settings for all the hosts.
 
 ## Inbound
@@ -380,6 +382,8 @@ If you already have an inbound SMTP listener configured, you should upgrade this
 
 - STARTTLS: Enable
 - Certificate: Select the certificate you want to use from the dropdown menu. 
+
+![](images/halon-inbound.png)
 
 ## Outbound
 There a multiple ways to enable outbound DANE: through a Transport Label or scripting.
@@ -391,6 +395,8 @@ Select the transport labels ID if you want to upgrade an existing one, otherwise
 
 - Destination hostname and port: Select Deliver to MX.
 - TLS STARTTLS: Select "DANE" or "DANE (required)" in the dropdown menu.
+
+![](images/halon-outbound.png)
 
 Notice: with "DANE (required)" there is no fallback to TLS or none option.
 

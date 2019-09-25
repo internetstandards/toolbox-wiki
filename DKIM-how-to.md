@@ -153,3 +153,89 @@ This means that incoming e-mail is instantly classificied as spam if there is no
 * the sending domain's DKIM ADSP record states that all e-mail should be signed and all unsigned mails should be discarded (DISCARD).
 * the sending domain's DKIM ADSP record states that all e-mail should be signed (ALL). 
 * the domain used in the "From"-header (a.k.a. RFC5322.From, Header From, Message From) does not exist. 
+
+# Implementing DKIM on HALON
+This example uses the internal capabilities of Halon for DKIM, it is possible to retrieve the private keys externally but that is outside this scope.
+
+**Specifics for this setup**
+- HALON 5.1-p3-argy
+
+**Assumptions**
+- Basic configuration of Halon
+- Operating DNS Server
+
+## Generic configuration
+### Upload or generate private key
+
+Navigate to: `Configuration -> Email engine -> Certificates and keys -> Add`
+
+- Give a ID (name) for the private key. Only lowercase, numbers and letters (limitation of Halon).
+- Select Type “Private key” and hit Generate.
+- Add a Comment like the selector name and date.
+- Click Add and then select the newly created private key in the overview, then click Details on top of the page.
+
+![](images/dkim-halon-private-key.png)
+
+On the detail page you see the public key you just generated and the button "DKIM record".
+
+![](images/dkim-halon-public-key-details.png)
+
+Click the "DKIM record" button and give your Domain and Selector which you want to use. Hit "Generate" and here you see the DKIM record which you can use in your DNS server.
+
+![](images/dkim-halon-dns-record.png)
+
+Publish the DNS record for the domain in your DNS environment.
+
+## Outbound signing
+
+Navigate to `Configuration -> Code editor` select there the End of Data (EOD/EOD rcpt) script where you want to use the DKIM signing.
+
+Before the `GetMailMessage()->queue()` add:
+
+```php
+$dkimselector = "selector201909"; // Selector
+$dkimdomain = "example.nl"; // Header From: 
+$dkimcertificate = "selector201909"; // certificate ID
+if (GetMailMessage()->signDKIM($dkimselector,$dkimdomain,"pki:".$dkimcertificate) == none)
+    Defer("DKIM signing error, bla bla error message");
+```
+
+The following syslog message is visible in the logging if DKIM signing is successful.
+```
+[6xxxxxxb-dxxf-1xx9-bxx5-0xxxxxxxxx4] [EOD] DKIM signed for example.nl (selector201909) with signature b=Yxxxxx9
+``` 
+
+## Inbound email
+
+Navigate to `Configuration -> Code editor` select there the End of Data (EOD/EOD rcpt) script where the incoming mail is checked.
+
+Before the `GetMailMessage()->queue()` add:
+
+```php
+foreach (GetMailMessage()->getHeaders("DKIM-Signature", ["field" => true]) as $i => $dkimsign) {
+    $dkimresult = GetMailMessage()->verifyDKIM($dkimsign);
+    if ($dkimresult["result"] not "pass") {
+        // Do something like Defer() Reject() or higher spamscore;
+    }
+}
+```
+
+The following syslog message is visible in the logging
+```
+on success: 
+[2xxxxxxc-dxx2-1xx9-axxv-xxxxxxxxxxxa] [EOD] Processing (dkimverify)
+[2xxxxxxc-dxx2-1xx9-axxv-xxxxxxxxxxxa] [EOD] DKIM(example.nl): Successfully verified
+
+on error, selector not found in DNS: 
+[2xxxxxxc-dxx2-1xx9-axxv-xxxxxxxxxxxa] [EOD] Processing (dkimverify)
+[2xxxxxxc-dxx2-1xx9-axxv-xxxxxxxxxxxa] [EOD] DKIM(example.nl): Permanent error: No key for signature selector201909._domainkey.example.nl
+
+on error, Mailbody has been manipulated:
+[2xxxxxxc-dxx2-1xx9-axxv-xxxxxxxxxxxa] [EOD] Processing (dkimverify)
+[2xxxxxxc-dxx2-1xx9-axxv-xxxxxxxxxxxa] [EOD] DKIM(example.nl): Permanent error: Body hash did not verify
+```
+
+# Special thanks
+Our infinite gratitude goes out to the following people for their support in building this how-to for DKIM.
+
+Tom van Leeuwen  

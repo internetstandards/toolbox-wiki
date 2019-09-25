@@ -1,4 +1,3 @@
-# Table of contents
 - [Introduction](#introduction)
 - [What is DKIM?](#what-is-dkim-)
 - [Why use DKIM?](#why-use-dkim-)
@@ -11,6 +10,12 @@
     + [Configure Postfix](#configure-postfix)
   * [Inbound e-mail](#inbound-e-mail)
     + [Configuring SpamAssassin](#configuring-spamassassin)
+- [Implementing DKIM on HALON](#implementing-dkim-on-halon)
+  * [Generic configuration](#generic-configuration)
+    + [Upload or generate private key](#upload-or-generate-private-key)
+  * [Outbound signing](#outbound-signing)
+  * [Inbound email](#inbound-email)
+- [Special thanks](#special-thanks)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
@@ -170,7 +175,7 @@ This example uses the internal capabilities of Halon for DKIM, it is possible to
 Navigate to: `Configuration -> Email engine -> Certificates and keys -> Add`
 
 - Give a ID (name) for the private key. Only lowercase, numbers and letters (limitation of Halon).
-- Select Type “Private key” and hit Generate.
+- Select Type Â“Private keyÂ” and hit Generate.
 - Add a Comment like the selector name and date.
 - Click Add and then select the newly created private key in the overview, then click Details on top of the page.
 

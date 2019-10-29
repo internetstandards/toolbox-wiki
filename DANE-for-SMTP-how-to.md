@@ -15,6 +15,7 @@ This how-to is created by the Dutch Internet Standards Platform (the organizatio
 - [Why use DANE for SMTP?](#why-use-dane-for-smtp-)
   * [Risks of SMTP with opportunistic TLS](#risks-of-smtp-with-opportunistic-tls)
   * [DANE addresses these risks](#dane-addresses-these-risks)
+  * [How about MTA-STS?](#how-about-mta-sts-)
 - [DANE TLSA record example](#dane-tlsa-record-example)
 - [Advantages of DANE explained by illustrations](#advantages-of-dane-explained-by-illustrations)
   * [Mail delivery: TLS without DANE](#mail-delivery--tls-without-dane)
@@ -86,6 +87,24 @@ The risks of SMTP with opportunistic TLS can be mitigated by using DANE:
 * The operator of the receiving domain's mail server is obligated to ensure that any published TLSA records at all times match the server's certificate chain, and that STARTTLS is enabled and working. This makes it possible for the sending domain's mail server to validate the certificate offered by the receiving domain's mail server.
 
 In short: DANE allows sending mail servers to unconditionally require STARTTLS with a matching certificate chain. Otherwise, the sending mail server aborts the connection and tries another server or defers the message. Receiving servers with published TLSA records, are therefore no longer vulnerable to the afore mentioned man in the middle attacks.
+
+## How about MTA-STS?
+Internet.nl currently does not include MTA-STA in its tests. This paragraph explains why this is the case. 
+
+First you need to understand that, as [explained on our website](https://en.internet.nl/faqs/report/), the selection and development of tests performed by internet.nl is primairily based on:
+* the [‘comply-or-explain’ list](https://www.forumstandaardisatie.nl/open-standaarden) of the Dutch Standardisation Forum which is mandatory for all Dutch government agencies;
+* security advices of the Dutch NCSC;
+* relevant RFC’s of IETF.
+
+Final decisions in this area are made by our steering committee.
+
+MTA-STS is a fairly new standard for enforcing authenticated transport encryption between mail servers. The standard was developed primarily by the big cloud mail providers and seems to especially meet their specific needs. We have seen [quite some uptake of DANE](https://github.com/baknu/DANE-for-SMTP/wiki/4.-Adoption-statistics) (e.g. by Comcast, Protonmail and Cisco), but until now not by the major cloud mail providers. MTA-STS is relatively complex because it needs an extra HTTPS interface (including certificate validation) to function, and it is also considered to be less secure than DANE due to trust on first use and caching. 
+
+MTA-STS relies on trust on first use (TOFU) and policy caching. So the initial connection is just STARTTLS (without authentication of the receiving mail server and without enforcing encryption). During that first connection the MTA-STS policy will be cached by the sending mail server and subsequent encrypted connections will be enforced and authenticated (until the policy cache time expires). This caching mechanism means the larger and more up up-to-date the cache, the better MTA-STS will work. Basically big (cloud) mail providers (that contact about every mail server worldwide each day) will have a large up-to-date policy cache, but smaller mail providers will not and therefore will run more often into trust on first use (i.e. initial less secure connection). So basically MTA-STS seems to offer better security to big players than to the smaller ones. In fact, the MTA-STS RFC [states](https://tools.ietf.org/html/rfc8461#section-10) that DANE offers better downgrade resistance. 
+
+In view of the foregoing and considering the facts that the Dutch NCSC [advises](https://www.ncsc.nl/documenten/factsheets/2019/juni/01/factsheet-beveilig-verbindingen-van-mailservers) to use DANE for securing mail transport, and DNSSEC adoption in the Netherlands (and some other countries like .SE, .NO and .CZ) is quite high and keeps increasing, DANE and not MTA-STS is on the 'comply or explain' list and subsequently included on internet.nl.
+
+Note that MTA-STA and DANE can co-exists next to each other. They intentionally do not interfere.
 
 # DANE TLSA record example
 ![](images/DANE-example-TLSA-record.png)

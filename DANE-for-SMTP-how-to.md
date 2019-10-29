@@ -15,7 +15,7 @@ This how-to is created by the Dutch Internet Standards Platform (the organizatio
 - [Why use DANE for SMTP?](#why-use-dane-for-smtp-)
   * [Risks of SMTP with opportunistic TLS](#risks-of-smtp-with-opportunistic-tls)
   * [DANE addresses these risks](#dane-addresses-these-risks)
-  * [How about MTA-STS?](#how-about-mta-sts-)
+  * [How about MTA-STS?](#how-about-mta-sts)
 - [DANE TLSA record example](#dane-tlsa-record-example)
 - [Advantages of DANE explained by illustrations](#advantages-of-dane-explained-by-illustrations)
   * [Mail delivery: TLS without DANE](#mail-delivery--tls-without-dane)

@@ -32,7 +32,8 @@ DMARC addresses this problem and enables the owner of a domain to take explicit 
 # Tips, tricks and notices for implementation
 * Interoperabily issues: https://tools.ietf.org/html/rfc7960
 * DMARC does not require both DKIM or SPF. But implementation of both is strongly advised.
-* DMARC is about aligning the DKIM and/or SPF domain with the organizational domain in the From header.
+* DMARC is about aligning the domain in the DKIM header (the "d=" value) and SPF header (*a.k.a. RFC5321.MailFrom, Return-Path, Envelope Sender, Envelope From*) with the organizational domain in the message From header (*a.k.a. RFC5322.From, Header From, Message From*) which is visible to the user.
+  * If these values do not align this could mean for example, that an attacker placed a valid DKIM signature header in an email with a "d=" value that points to a domain the attacker controls, allowing DKIM to pass while still spoofing the From address to the user.
 * Parked domain: “DMARC p=reject”. Make sure to include rua and ruf addresses, since this allows monitoring of possible abuse attempts. Implement additional records (SPF, DKIM, NullMX) if possible, see also our [Parked domain how-to](https://github.com/internetstandards/toolbox-wiki/blob/master/parked-domain-how-to.md).
 * RFC 7489 [states](https://tools.ietf.org/html/rfc7489#section-6.4) that the tags dmarc-version ("v=") and dmarc-request ("p=") should be on the first and second position of the DMARC record. The order of the other tags does not matter: "components other than dmarc-version and dmarc-request may appear in any order".
 * [Errata 5440 of RFC 7489](https://www.rfc-editor.org/errata_search.php?rfc=7489) states that a semicolon should be included in the DMARC version tag. Correct: "v=DMARC1;". Incorrect: "v=DMARC1". 
@@ -49,8 +50,8 @@ The DMARC policy is published by means of a DNS TXT record. A DMARC record can c
 | rua | optional | rua@example.nl | This field contains the email address used to send **aggregate** reports to |
 | ruf | optional |ruf@example.nl | This field contains the email address used to send **forensic** reports to |
 | fo | mandatory | <br>0<br>1<br>s<br>d | Reporting options for failure reports. Generates a report if:<br>- both SPF and DKIM tests fail (0)<br>- either SPF or DKIM test fail (1)<br>- SPF test fails (s)<br>- DKIM test fails (d) |
-| adkim | optional | s<br>r | Controls how strict the result of DKIM verification should be intepreted. Strict or relaxed. |
-| aspf | optional | s<br>r | Controls how strict the result of SPF verification should be intepreted. Strict or relaxed. |
+| adkim | optional | s<br>r | Controls how strict the result of DKIM alignment checks should be intepreted. Strict or relaxed. |
+| aspf | optional | s<br>r | Controls how strict the result of SPF alignment checks should be intepreted. Strict or relaxed. |
 | pct | optional | 0..100 | Determine percentage of mail from your domain to have the DMARC verificaton done by other mail providers. Default is 100. |
 | rf | optional | afrf<br>aodef | Preferred reporting format for forensic reports. Default is afrf. |
 | ri | optional | 60..86400 | Interval (in seconds) at which you want to receive DMARC reports. The DMARC RFC specifies that organizations should be able to send reports at least once every day (86400 seconds) and also states a minimum interval of one hour (60 seconds). Default is 86400. |

@@ -312,7 +312,10 @@ This setting tells Postfix to perform DNS lookups using DNSSEC. This is an impor
 
 `smtp_tls_security_level = dane`  
 
-By default Postfix uses opportunistic TLS (smtp_tls_security_level = may) which is susceptible to man in the middle attacks. You could tell Postfix to use mandatory TLS (smtp_tls_security_level = encrypt) but this breaks backwards compatibility with mail servers that don't support TLS (and only work with plaintext delivery). However, when Postfix is configured to use the "dane" security level (smtp_tls_security_level = dane) it becomes resistant to man in the middle attacks, since Postfix will connect to other mail servers using "mandatory TLS" when TLSA records are found. If TLSA records are found but are unusable, Postfix won't fallback to plaintext or unauthenticated delivery. 
+By default Postfix uses opportunistic TLS (smtp_tls_security_level = may) which is susceptible to man in the middle attacks. You could tell Postfix to use mandatory TLS (smtp_tls_security_level = encrypt) but this breaks backwards compatibility with mail servers that don't support TLS (and only work with plaintext delivery). However, when Postfix is configured to use the "dane" security level (smtp_tls_security_level = dane) it becomes resistant to man in the middle attacks, since Postfix will connect to other mail servers using "mandatory TLS" when TLSA records are found. This means that: 
+* If TLSA records are found but are unusable, Postfix will NOT fallback to opportunistic TLS (STARTTLS) or ultimately plaintext delivery. 
+* If no TLSA records are found (and thus DANE is not supported), Postfix will fallback to opportunistic TLS (STARTTLS) or ultimality plaintext delivery.
+To enforce DANE you can use "smtp_tls_security_level = dane-only" (aka mandatory DANE). With this setting a sending mail server makes sure there is no fallback to opportunistic TLS (STARTTLS) or plaintext when either the TLSA records are unusable or absent. It is possible to use mandatory DANE on a per domain basis. For example when you know a certain domain should support DANE and you want to be absolutely sure that a secure and validated delivery is used and want to prevent fallbacks to a less secure delivery method. 
 
 `smtp_host_lookup = dns`  
 

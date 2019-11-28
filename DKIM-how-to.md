@@ -37,7 +37,7 @@ A common used technique used by spammers is to trick the receiving party into be
 ## Canonicalization
 As mentioned in [RFC 6376 section 3.4](https://tools.ietf.org/html/rfc6376#section-3.4) some mail systems modify e-mail in transit. This type of modification is called canonicalization and is generally used to make things comparable before presenting the email to the signing or verification algorithm. You can imagine that this is important when signing and validating an e-mail; if things change too much this can invalidate a DKIM signature, which also impacts DMARC.
 
-DKIM allows you to specify the canonicalization settings by using the "c" tag. Accepted values are "relaxed" and "simple" and since canonicalization exists for both the header and the body of an e-mail, the format used to represent the canonicalization setting is "value/value" for header and body respectively. 
+DKIM software allows you to specify the canonicalization settings. The settings used by the sender are set in the DKIM header of every e-mail using the "c" tag. Accepted values are "relaxed" and "simple" and since canonicalization exists for both the header and the body of an e-mail, the format used to represent the canonicalization setting is "value/value" for header and body respectively. 
 
 We currently advise against the "simple/simple" canonicalization setting because this (being the most strict setting) tolerates almost no modification of the header and body before signing, which is prone to cause problems when forwarding mail. This is confirmed in RFC 7960 [section 2.3](https://tools.ietf.org/html/rfc7960#section-2.3) and [section 4.1.1.2](https://tools.ietf.org/html/rfc7960#section-4.1.1.2). Therefore we recommend to use the "relexed/relaxed" setting which tolerates common modifications of the header and body before signing. 
 
@@ -65,7 +65,7 @@ DKIM for outbound e-mail traffic can be accomplished by publishing a DKIM policy
 Make sure the file ***/etc/opendkim.conf** has a least the following configuration options.
 
     UMask                   002
-    Canonicalization        relaxed/simple
+    Canonicalization        relaxed/relaxed
     Mode                    sv
     AutoRestart             Yes
     AutoRestartRate         10/1h

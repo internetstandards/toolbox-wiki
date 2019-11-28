@@ -35,7 +35,7 @@ A common used technique used by spammers is to trick the receiving party into be
 * It is generally recommended to explicitly configure parked domains to not use e-mail. For DKIM this is done with an empty policy: "v=DKIM1; p=". 
 
 ## Canonicalization
-As mentioned in [RFC 6376 section 3.4](https://tools.ietf.org/html/rfc6376#section-3.4) some mail systems modify e-mail in transit. This type of modification is called canonicalization and is generally used to make things comparable before presenting the email to the signing or verification algorithm. You can imagine that this is important when signing and validating an e-mail; if things change too much this can invalidate a DKIM signature. This al
+As mentioned in [RFC 6376 section 3.4](https://tools.ietf.org/html/rfc6376#section-3.4) some mail systems modify e-mail in transit. This type of modification is called canonicalization and is generally used to make things comparable before presenting the email to the signing or verification algorithm. You can imagine that this is important when signing and validating an e-mail; if things change too much this can invalidate a DKIM signature, which also impacts DMARC.
 
 DKIM allows you to specify the canonicalization settings by using the "c" tag. Accepted values are "relaxed" and "simple" and since canonicalization exists for both the header and the body of an e-mail, the format used to represent the canonicalization setting is "value/value" for header and body respectively. 
 

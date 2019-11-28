@@ -2,6 +2,7 @@
 - [What is DKIM?](#what-is-dkim-)
 - [Why use DKIM?](#why-use-dkim-)
 - [Tips, tricks and notices for implementation](#tips--tricks-and-notices-for-implementation)
+  * [Canonicalization](#canonicalization)
 - [Implementing DKIM with OpenDKIM for Postfix with SpamAssassin](#implementing-dkim-with-opendkim-for-postfix-with-spamassassin)
   * [Outbound e-mail traffic](#outbound-e-mail-traffic)
     + [Set up OpenDKIM and created key pair for your domain](#set-up-opendkim-and-created-key-pair-for-your-domain)
@@ -30,8 +31,19 @@ A common used technique used by spammers is to trick the receiving party into be
 
 # Tips, tricks and notices for implementation
 * Use a DKIM key (RSA) of [at least 1024 bits](https://tools.ietf.org/html/rfc6376#section-3.3.3) to minimize the successrate of offline attacks. Don't go beyond a key size of 2048 bits since this is not mandatory according to the RFC.
-* Make sure you to change your DKIM keys regularly. A rotation scheme of 6 months is recommended.
+* Make sure to change your DKIM keys regularly. A rotation scheme of 6 months is recommended.
 * It is generally recommended to explicitly configure parked domains to not use e-mail. For DKIM this is done with an empty policy: "v=DKIM1; p=". 
+
+## Canonicalization
+As mentioned in [RFC 6376 section 3.4](https://tools.ietf.org/html/rfc6376#section-3.4) some mail systems modify e-mail in transit. This type of modification is called canonicalization and is generally used to make things comparable before presenting the email to the signing or verification algorithm. You can imagine that this is important when signing and validating an e-mail; if things change too much this can invalidate a DKIM signature. This al
+
+DKIM allows you to specify the canonicalization settings by using the "c" tag. Accepted values are "relaxed" and "simple" and since canonicalization exists for both the header and the body of an e-mail, the format used to represent the canonicalization setting is "value/value" for header and body respectively. 
+
+We currently advise against the "simple/simple" canonicalization setting because this (being the most strict setting) tolerates almost no modification of the header and body before signing, which is prone to cause problems when forwarding mail. This is confirmed in RFC 7960 [section 2.3](https://tools.ietf.org/html/rfc7960#section-2.3) and [section 4.1.1.2](https://tools.ietf.org/html/rfc7960#section-4.1.1.2). Therefore we recommend to use the "relexed/relaxed" setting which tolerates common modifications of the header and body before signing. 
+
+Notice: 
+* When not specified DKIM canoncalization defaults to "strict/strict". 
+* "c=strict" equals "c=strict/strict", but "c=relaxed" equals "relaxed/strict". 
 
 # Implementing DKIM with OpenDKIM for Postfix with SpamAssassin
 **Specifics for this setup**

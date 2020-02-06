@@ -39,7 +39,9 @@ DMARC addresses this problem and enables the owner of a domain to take explicit 
 * [Errata 5440 of RFC 7489](https://www.rfc-editor.org/errata_search.php?rfc=7489) states that a semicolon should be included in the DMARC version tag. Correct: "v=DMARC1;". Incorrect: "v=DMARC1". 
 * When using office 365, the forwarding of calendar appointments from a DMARC projected domain fails. This is a known issue. Read more on the [Office 365 UserVoice forum](https://office365.uservoice.com/forums/264636-general/suggestions/34012756-forwarding-of-calendar-appointments-from-a-dmarc-p) and don't forget to submit your vote! 
   * There is a workaround: Forward the appointment as an "iCalendar file" or as an attachment. 
-
+* When processing incoming mail we advise to favor a DMARC policy over an SPF policy. Do not configure SPF rejection to go into effect early in handling, but take full advantage of the enhancements DMARC is offering. A message might still pass based on DKIM.
+  * At the same time, be aware that some operaters still allow a hard fail (-all) to go into effect early in handling and skip DMARC operations. 
+  
 # Overview of DMARC configuration tags
 The DMARC policy is published by means of a DNS TXT record. A DMARC record can contain several configuration tags. The table below will list all configuration tags and explain their purpose.
 
@@ -82,6 +84,10 @@ Depending on your preferences and needs, you can determine the value of the conf
 Because this specific setup uses SpamAssassin for classifying e-mail to be SPAM or legitimate (HAM), the DMARC policy used is quarantine. This is done to prevent OpenDMARC from blocking the e-mail and, as a result, not enabling SpamAssassin to do its job.
 
 ## Inbound e-mail traffic
+Ideally incoming e-mail is processed by making a single decision based on a collective evaluation of all relevant e-mail standards (SPF, DKIM, DMARC). Although this would be the most elegant way of processing incoming e-mail, most e-mail servers process e-mail standards in a sequential order. This should be taken into consideration when configuring your own e-mail environment; depending on a domain owner's preferences it is also possible to implement a "single decision" e-mail environment.
+
+Thereafter, it is [stated in the DMARC RFC](https://tools.ietf.org/html/rfc7489#section-10.1) that some receiver architectures might implement SPF in advance of any DMARC operations. This means that a "-" prefix on a sender's SPF mechanism, such as "-all", could cause that rejection to go into effect early in handling, causing message rejection before any DMARC processing takes place. While operators choosing to use "-all" should be aware of this, we advise to favor a DMARC policy over an SPF policy. As also [stated in the DMARC RFC](https://tools.ietf.org/html/rfc7489#section-6.7), the final diposition of a message is always a matter of local policy. With this in mind we feel that operators should not configure SPF rejection to go into effect early in handling, and thus disregarding DMARC. At the cost of processing the entire message body, we advise to always evaluate all relevant standards before coming to a decision. If SPF fails, DKIM might still pass resulting in a satisfying DMARC evaluation. 
+
 DMARC for inbound e-mail traffic can be accomplished by setting up OpenDMARC and integrate it with Postfix.
 
 ### Set up OpenDMARC

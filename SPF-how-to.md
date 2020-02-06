@@ -29,6 +29,7 @@ Our current e-mail infrastructure was originally designed for any mail sending h
 * E-mail forwarding is not supported, since the e-mail is often forwarded by another e-mail server.
 * SPF does not work between domains that use the same e-mail server.
 * Parked domains should be explicitly configured to not use e-mail. For SPF this is done with an empty policy and a hard fail: "v=spf1 –all".
+* Be aware that the usage of a hard fail (-all) could mean that the receiver skips DMARC operations, since the receiving mail architecture is configured to let a SPF fail go into effect early in handling.
 
 # Outbound e-mail traffic (DNS records)
 SPF for outbound e-mail traffic is limited to publishing an SPF policy as a TXT-record in a domain name's DNS zone. This enables other parties to use SPF for validating the authenticity of e-mail servers sending e-mail on behalf of your domain name. 
@@ -40,6 +41,8 @@ Although a soft fail (~all) is recommended in order to prevent false positives, 
 
 # Inbound e-mail traffic 
 Ideally incoming e-mail is processed by making a **single decision** based on a collective evaluation of all relevant e-mail standards (SPF, DKIM, DMARC). Although this would be the most elegant way of processing incoming e-mail, most e-mail servers process e-mail standards in a sequential order. This should be taken into consideration when configuring your own e-mail environment; depending on a domain owner's preferences it is also possible to implement a "single decision" e-mail environment.
+
+Thereafter, it is [stated in the DMARC RFC](https://tools.ietf.org/html/rfc7489#section-10.1) that some receiver architectures might implement SPF in advance of any DMARC operations. This means that a "-" prefix on a sender's SPF mechanism, such as "-all", could cause that rejection to go into effect early in handling, causing message rejection before any DMARC processing takes place. Operators choosing to use "-all" should be aware of this.
 
 ## Implementing SPF in Postfix with SpamAssassin
 **Specifics for this setup**

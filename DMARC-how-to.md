@@ -20,7 +20,7 @@
 This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DMARC.
 
 # What is DMARC?
-DMARC is short for **D**omain based **M**essage **A**uthentication, **R**eporting and **C**onformance and is described in [RFC 7489](https://tools.ietf.org/html/rfc7489). With DMARC the owner of a domain can, by means of a DNS record, publish a  policy that states how to handle e-mail (deliver, quarantine, reject) which is not properly authenticated using SPF and/or DKIM. 
+DMARC is short for **D**omain based **M**essage **A**uthentication, **R**eporting and **C**onformance and is described in [RFC 7489](https://tools.ietf.org/html/rfc7489). With DMARC the owner of a domain can, by means of a DNS record, publish a  policy that states how to handle e-mail (deliver, quarantine, reject) which is not properly authenticated using SPF and/or DKIM. Because DMARC depends on the security of DNS, the use of DNSSEC is highly recommended. 
 
 At the same time DMARC also provides the means for receiving reports which allows a domain's administrator to detect whether their domainname is used for phishing or spam. 
  
@@ -41,6 +41,9 @@ DMARC addresses this problem and enables the owner of a domain to take explicit 
   * There is a workaround: Forward the appointment as an "iCalendar file" or as an attachment. 
 * When processing incoming mail we advise to favor a DMARC policy over an SPF policy. Do not configure SPF rejection to go into effect early in handling, but take full advantage of the enhancements DMARC is offering. A message might still pass based on DKIM.
   * At the same time, be aware that some operaters still allow a hard fail (-all) to go into effect early in handling and skip DMARC operations. 
+* When using a different domain for the rua and/or ruf address, make sure that the DMARC authorization records (example.nl._report._dmarc.differentdomain.nl) are properly DNSSEC signed. A regularly occuring mistake is the presence of "proof of non-existence" (NSEC3) for the ancestor domain (_report._dmarc.differentdomain.nl). If this happens then resolvers that use qname minimization (like the resolver used by [Internet.nl](https://internet.nl)) think that example.nl._report._dmarc.differentdomain.nl does not exists since _report._dmarc.differentdomain.nl does not exists. Therefore the resolver can't get the DMARC authorization record which makes DMARC fail. 
+  * Check your DNSSEC implementation on [DNSViz](https://dnsviz.net/). Enter "example.nl._report._dmarc.differentdomain.nl".
+  * You can also manually check for this error. `dig example.nl._report._dmarc.differentdomain.nl +dnssec` results in a NOERROR response, while `dig _report._dmarc.differentdomain.nl +dnssec` results in a NXDOMAIN response. 
   
 # Overview of DMARC configuration tags
 The DMARC policy is published by means of a DNS TXT record. A DMARC record can contain several configuration tags. The table below will list all configuration tags and explain their purpose.

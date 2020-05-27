@@ -32,7 +32,10 @@ A common used technique used by spammers is to trick the receiving party into be
 # Tips, tricks and notices for implementation
 * Use a DKIM key (RSA) of [at least 1024 bits](https://tools.ietf.org/html/rfc6376#section-3.3.3) to minimize the successrate of offline attacks. Don't go beyond a key size of 2048 bits since this is not mandatory according to the RFC.
 * Make sure to change your DKIM keys regularly. A rotation scheme of 6 months is recommended.
-* It is generally recommended to explicitly configure parked domains to not use e-mail. For DKIM this is done with an empty policy: "v=DKIM1; p=". 
+* If a domain is not using e-mail (anymore), it is recommended to set an empty public key: "v=DKIM1; p=". 
+  * When used with a specific selector, an empty public key means that e-mail signed with the associated public key must be considered unreliable since they public key was revoked. 
+  * When used with a wildcard selector, setting an empty public key indicates that all previously used keys are revoked and must be considered unreliable. The owner of a domain can also use this to explicitly signal that a domain is not configured to use e-mail. 
+  * [According to the RFC](https://tools.ietf.org/html/rfc6376#section-6.1.2) the absence of a selector / public key (e.g. as a result of deleting the entire DKIM resource record) is semantically equal to a resource record with an empty public key.  
 
 ## Canonicalization
 As mentioned in [RFC 6376 section 3.4](https://tools.ietf.org/html/rfc6376#section-3.4) some mail systems modify e-mail in transit. This type of modification is called canonicalization and is generally used to make things comparable before presenting the email to the signing or verification algorithm. You can imagine that this is important when signing and validating an e-mail; if things change too much this can invalidate a DKIM signature, which also impacts DMARC.

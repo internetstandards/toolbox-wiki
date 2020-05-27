@@ -1,5 +1,9 @@
+<img align="right" src="images/logo-internetnl-en.svg">
+
+# DMARC how-to
+This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DMARC.
+
 # Table of contents
-- [Introduction](#introduction)
 - [What is DMARC?](#what-is-dmarc-)
 - [Why use DMARC?](#why-use-dmarc-)
 - [Tips, tricks and notices for implementation](#tips--tricks-and-notices-for-implementation)
@@ -15,9 +19,6 @@
 - [Special thanks](#special-thanks)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
-
-# Introduction
-This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DMARC.
 
 # What is DMARC?
 DMARC is short for **D**omain based **M**essage **A**uthentication, **R**eporting and **C**onformance and is described in [RFC 7489](https://tools.ietf.org/html/rfc7489). With DMARC the owner of a domain can, by means of a DNS record, publish a  policy that states how to handle e-mail (deliver, quarantine, reject) which is not properly authenticated using SPF and/or DKIM. Because DMARC depends on the security of DNS, the use of DNSSEC is highly recommended. 

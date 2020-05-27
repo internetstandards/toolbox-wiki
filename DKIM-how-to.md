@@ -1,4 +1,9 @@
-- [Introduction](#introduction)
+<img align="right" src="images/logo-internetnl-en.svg">
+
+# DKIM how-to
+This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DKIM.
+
+# Table of contents
 - [What is DKIM?](#what-is-dkim-)
 - [Why use DKIM?](#why-use-dkim-)
 - [Tips, tricks and notices for implementation](#tips--tricks-and-notices-for-implementation)
@@ -19,9 +24,6 @@
 - [Special thanks](#special-thanks)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
-
-# Introduction
-This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing DKIM.
 
 # What is DKIM?
 DKIM stands for **D**omain**K**eys **I**dentified **M**ail and is described in [RFC 6376](https://tools.ietf.org/html/rfc6376) with updates in [RFC 8301](https://tools.ietf.org/html/rfc8301) and [RFC 8463](https://tools.ietf.org/html/rfc8463). It is meant to provide the owner of a domain with the means to claim that a message has actually been send by the domain's e-mail server and should therefore be considered legitimate. It works by signing every individual e-mail message with a specific key (private key), so that the receiving party can use a corresponding key (public key) published in the sending domain's DNS record to validate the e-mail authenticity and to check whether the e-mail has not been tampered with. 

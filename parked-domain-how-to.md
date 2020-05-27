@@ -1,4 +1,9 @@
-- [Introduction](#introduction)
+<img align="right" src="images/logo-internetnl-en.svg">
+
+# Introduction
+This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on explicitly configuring a parked domain not to use e-mail.
+
+# Table of contents
 - [What is a parked domain?](#what-is-a-parked-domain-)
 - [Domain without e-mail](#domain-without-e-mail)
   * [Null MX](#null-mx)
@@ -8,9 +13,6 @@
 - [Domain without a website](#domain-without-a-website)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
-
-# Introduction
-This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on explicitly configuring a parked domain not to use e-mail.
 
 # What is a parked domain?
 [Domain parking](https://en.wikipedia.org/wiki/Domain_parking) is the registration of an Internet domain name without that domain being associated with any services such as e-mail or a website. 

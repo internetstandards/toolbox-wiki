@@ -28,7 +28,7 @@ Our current e-mail infrastructure was originally designed for any mail sending h
 * The sender address shown to the user ("RFC5322.From") is not used when authenticating. SPF uses the invisible "RFC5321.MailFrom" header. Combining SPF with DMARC removes this disadvantage. 
 * E-mail forwarding is not supported, since the e-mail is often forwarded by another e-mail server.
 * SPF does not work between domains that use the same e-mail server.
-* Parked domains should be explicitly configured to not use e-mail. For SPF this is done with an empty policy and a hard fail: "v=spf1 –all".
+* Parked domains should be explicitly configured to not use e-mail. For SPF this is done with an empty policy (not mentioning any ip-adresses or hostnames which are allowed to send mail) and a hard fail: "v=spf1 –all".
 * When processing incoming mail we advise to favor a DMARC policy over an SPF policy. Do not configure SPF rejection to go into effect early in handling, but take full advantage of the enhancements DMARC is offering. A message might still pass based on DKIM.
   * At the same time, be aware that some operaters still allow a hard fail (-all) to go into effect early in handling and skip DMARC operations. 
 

@@ -1,3 +1,14 @@
+- [Introduction](#introduction)
+- [What is a parked domain?](#what-is-a-parked-domain-)
+  * [Domain without e-mail](#domain-without-e-mail)
+    + [Null MX](#null-mx)
+    + [DMARC](#dmarc)
+    + [DKIM](#dkim)
+    + [SPF](#spf)
+  * [Domain without a website](#domain-without-a-website)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
 # Introduction
 This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on explicitly configuring a parked domain not to use e-mail.
 
@@ -18,10 +29,12 @@ Set DMARC policy to reject mails, but allow reporting to take place. This helps 
 `_dmarc IN TXT "v=DMARC1; p=reject; rua=mailto:rua@example.nl; ruf=mailto:ruf@example.nl`
 
 ### DKIM
+When used with a wildcard selector, setting an empty public key indicates that all previously used keys are revoked and must be considered unreliable. The owner of a domain can also use this to explicitly signal that a domain is not configured to use e-mail. See our [DKIM how-to](https://github.com/internetstandards/toolbox-wiki/blob/master/DKIM-how-to.md) for more information. 
 
 `*._domainkey IN TXT "v=DKIM1; p="`
 
 ### SPF
+Set an an empty policy (not mentioning any ip-adresses or hostnames which are allowed to send mail) and a hard fail.
 
 `example.nl IN TXT "v=spf1 –all"`
  

@@ -1,6 +1,6 @@
 <img align="right" src="images/logo-internetnl-en.svg">
 
-# Introduction
+# Parked domain how-to
 This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on explicitly configuring a parked domain not to use e-mail.
 
 # Table of contents

@@ -1,5 +1,6 @@
 # Welcome to the [Internet.nl](https://internet.nl) toolbox. 
 
+![](images/logo-internetnl-en.svg)
 This GitHub repository contains several how-to's for providing practical information and guidance on implementing secure and modern Internet Standards. The how-to's are maintained by the Dutch Internet Standards Platform (the organization behind [Internet.nl](https://internet.nl)) and are created in cooperation with industry experts and enthusiasts (hosters, vendors, etc).
 
 Feedback and/or contributions are much appreciated and welcome through issues, pull requests or via question@internet.nl.

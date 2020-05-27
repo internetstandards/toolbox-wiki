@@ -31,8 +31,6 @@ Set DMARC policy to reject mails, but allow reporting to take place. This helps 
 ## DKIM
 When using a wildcard selector to set an empty public key, you indicate that all previously used keys are revoked and must be considered unreliable. You can also use this to explicitly signal that a domain is not configured to use e-mail. However, [according to the RFC](https://tools.ietf.org/html/rfc6376#section-6.1.2) the absence of a selector / public key (e.g. as a result of deleting the entire DKIM resource record) is semantically equal to a resource record with an empty public key. This means that both approaches should be treated similar by the receiving mail server.
 
- This See our [DKIM how-to](https://github.com/internetstandards/toolbox-wiki/blob/master/DKIM-how-to.md) for more information. 
-
 `*._domainkey IN TXT "v=DKIM1; p="`
 
 ## SPF

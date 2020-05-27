@@ -1,8 +1,8 @@
-# Welcome to the [Internet.nl](https://internet.nl) Toolbox wiki. 
+# Welcome to the [Internet.nl](https://internet.nl) toolbox. 
 
 This GitHub repository contains several how-to's for providing practical information and guidance on implementing secure and modern Internet Standards. The how-to's are maintained by the Dutch Internet Standards Platform (the organization behind [Internet.nl](https://internet.nl)) and are created in cooperation with industry experts and enthusiasts (hosters, vendors, etc).
 
-**Notice that the how-to's are currently still under construction**. Feedback is welcome through issues, pull requests or via  question@internet.nl.
+Feedback and/or contributions are much appreciated and welcome through issues, pull requests or via question@internet.nl.
 
 # Quick access
 [DANE how-to](https://github.com/internetstandards/toolbox-wiki/blob/master/DANE-for-SMTP-how-to.md)  

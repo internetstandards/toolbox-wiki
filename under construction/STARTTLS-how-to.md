@@ -57,6 +57,7 @@ Under construction
     smtpd_tls_ciphers=high
 	# disable compression and client-initiated renegotiation
     tls_ssl_options = NO_COMPRESSION, 0x40000000
+	# disable unsecure ciphers
     smtpd_tls_exclude_ciphers = aNULL, eNULL, EXPORT, DES, RC4, MD5, PSK, EDH-DSS-DES-CBC3-SHA, EDH-RSA-DES-CBC3-SHA, KRB5-DES, CBC3-SHA, DHE-RSA-AES256-CCM8, AES256-CCM8, DHE-RSA-AES128-CCM8, AES128-CCM8
     smtp_tls_exclude_ciphers = aNULL, eNULL, EXPORT, DES, RC4, MD5, PSK, EDH-DSS-DES-CBC3-SHA, EDH-RSA-DES-CBC3-SHA, KRB5-DES, CBC3-SHA, DHE-RSA-AES256-CCM8, AES256-CCM8, DHE-RSA-AES128-CCM8, AES128-CCM8
 	# Enable server cipher-suite preferences

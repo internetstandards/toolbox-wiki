@@ -1,4 +1,4 @@
-<img align="right" src="images/logo-internetnl-en.svg">
+<img align="right" src="/images/logo-internetnl-en.svg">
 
 # UNDER CONSTRUCTION!!! 
 
@@ -6,23 +6,16 @@
 This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing STARTTLS.  
 
 # Table of contents
-To-Do
+Under construction
 
 # What is STARTTLS?
-
+Under construction
 
 # Why use STARTTLS?
-
+Under construction
 
 # Tips, tricks and notices for implementation
-* The sender address shown to the user ("RFC5322.From") is not used when authenticating. SPF uses the invisible "RFC5321.MailFrom" header. Combining SPF with DMARC removes this disadvantage. 
-* E-mail forwarding is not supported, since the e-mail is often forwarded by another e-mail server.
-* SPF does not work between domains that use the same e-mail server.
-* Parked domains should be explicitly configured to not use e-mail. For SPF this is done with an empty policy (not mentioning any ip-adresses or hostnames which are allowed to send mail) and a hard fail: "v=spf1 –all".
-* When processing incoming mail we advise to favor a DMARC policy over an SPF policy. Do not configure SPF rejection to go into effect early in handling, but take full advantage of the enhancements DMARC is offering. A message might still pass based on DKIM.
-  * At the same time, be aware that some operaters still allow a hard fail (-all) to go into effect early in handling and skip DMARC operations. 
-
-
+* http://postfix.1071664.n5.nabble.com/Disable-SSL-TLS-renegotiation-td96864.html#a96871
 
 ## Implementing STARTTLS in Postfix
 **Specifics for this setup**
@@ -36,13 +29,21 @@ To-Do
 
 ### Configuring Postfix
 
-    # use DANE
+    # use DANE (when acting as a client)
     smtp_dns_support_level = dnssec
     smtp_tls_security_level = dane
     smtp_host_lookup = dns
     smtp_tls_note_starttls_offer = yes
-    
-    # TLS protocol config
+
+    # --- TLS settings ---
+    smtpd_tls_security_level = may
+    smtpd_tls_key_file = /etc/postfix/ssl/example.nl.key
+    smtpd_tls_cert_file = /etc/postfix/ssl/example.nl.crt
+    smtpd_tls_CAfile = /etc/postfix/ssl/example.nl-cabundle.crt
+    smtpd_tls_received_header = yes
+    smtpd_tls_session_cache_timeout = 3600s
+      
+    # --- TLS protocol config ---
     smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
     smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
     smtp_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
@@ -50,9 +51,10 @@ To-Do
     lmtp_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
     lmtp_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
 	
-	# TLS cipher config
+	# --- TLS cipher config ---
     smtpd_tls_mandatory_ciphers=high
     smtpd_tls_ciphers=high
+	# disable compression and client-initiated renegotiation
     tls_ssl_options = NO_COMPRESSION, 0x40000000
     smtpd_tls_exclude_ciphers = aNULL, eNULL, EXPORT, DES, RC4, MD5, PSK, EDH-DSS-DES-CBC3-SHA, EDH-RSA-DES-CBC3-SHA, KRB5-DES, CBC3-SHA, DHE-RSA-AES256-CCM8, AES256-CCM8, DHE-RSA-AES128-CCM8, AES128-CCM8
     smtp_tls_exclude_ciphers = aNULL, eNULL, EXPORT, DES, RC4, MD5, PSK, EDH-DSS-DES-CBC3-SHA, EDH-RSA-DES-CBC3-SHA, KRB5-DES, CBC3-SHA, DHE-RSA-AES256-CCM8, AES256-CCM8, DHE-RSA-AES128-CCM8, AES128-CCM8
@@ -61,7 +63,8 @@ To-Do
     # Forward secrecy (use the RFC 7919 defined DH group:https://raw.githubusercontent.com/internetstandards/dhe_groups/master/ffdhe4096.pem)
     smtpd_tls_eecdh_grade=ultra
     smtpd_tls_dh1024_param_file = /etc/postfix/ssl/ffdhe4096.pem
-    # log the ciphers that are used
+	
+	# --- TLS logging ---
     smtp_tls_loglevel = 1
     smtpd_tls_loglevel = 1
 

@@ -16,6 +16,7 @@ Under construction
 
 # Tips, tricks and notices for implementation
 * http://postfix.1071664.n5.nabble.com/Disable-SSL-TLS-renegotiation-td96864.html#a96871
+* Use the RFC 7919 defined DH groups: https://raw.githubusercontent.com/internetstandards/dhe_groups/master/ffdhe4096.pem)
 
 ## Implementing STARTTLS in Postfix
 **Specifics for this setup**
@@ -60,7 +61,7 @@ Under construction
     smtp_tls_exclude_ciphers = aNULL, eNULL, EXPORT, DES, RC4, MD5, PSK, EDH-DSS-DES-CBC3-SHA, EDH-RSA-DES-CBC3-SHA, KRB5-DES, CBC3-SHA, DHE-RSA-AES256-CCM8, AES256-CCM8, DHE-RSA-AES128-CCM8, AES128-CCM8
 	# Enable server cipher-suite preferences
     tls_preempt_cipherlist = yes
-    # Forward secrecy (use the RFC 7919 defined DH group:https://raw.githubusercontent.com/internetstandards/dhe_groups/master/ffdhe4096.pem)
+    # Forward secrecy
     smtpd_tls_eecdh_grade=ultra
     smtpd_tls_dh1024_param_file = /etc/postfix/ssl/ffdhe4096.pem
 	

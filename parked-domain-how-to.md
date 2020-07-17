@@ -23,7 +23,7 @@ If a domain is not using e-mail it is recommended to use the following settings.
 ## Null MX
 Explicitly configure an 'empty' MX record according to [RFC7505 ](https://tools.ietf.org/html/rfc7505). 
 
-`example.nl IN MX 0 .`
+`example.nl. IN MX 0 .`
 
 ## DMARC
 Set DMARC policy to reject mails, but allow reporting to take place. This helps detecting activity related to your domain.

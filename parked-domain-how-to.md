@@ -28,17 +28,17 @@ Explicitly configure an 'empty' MX record according to [RFC7505 ](https://tools.
 ## DMARC
 Set DMARC policy to reject mails, but allow reporting to take place. This helps detecting activity related to your domain.
 
-`_dmarc IN TXT "v=DMARC1; p=reject; rua=mailto:rua@example.nl; ruf=mailto:ruf@example.nl`
+`_dmarc.example.nl. IN TXT "v=DMARC1; p=reject; rua=mailto:rua@example.nl; ruf=mailto:ruf@example.nl"`
 
 ## DKIM
 When using a wildcard selector to set an empty public key, you indicate that all previously used keys are revoked and must be considered unreliable. You can also use this to explicitly signal that a domain is not configured to use e-mail. However, [according to the RFC](https://tools.ietf.org/html/rfc6376#section-6.1.2) the absence of a selector / public key (e.g. as a result of deleting the entire DKIM resource record) is semantically equal to a resource record with an empty public key. This means that both approaches should be treated similar by the receiving mail server.
 
-`*._domainkey IN TXT "v=DKIM1; p="`
+`*._domainkey.example.nl. IN TXT "v=DKIM1; p="`
 
 ## SPF
 Set an an empty policy (not mentioning any ip-adresses or hostnames which are allowed to send mail) and a hard fail.
 
-`example.nl IN TXT "v=spf1 –all"`
+`example.nl. IN TXT "v=spf1 –all"`
  
 # Domain without a website
 Apply the following settings to domains not using a website.

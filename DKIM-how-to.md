@@ -44,7 +44,7 @@ As mentioned in [RFC 6376 section 3.4](https://tools.ietf.org/html/rfc6376#secti
 
 DKIM software allows you to specify the canonicalization settings. The settings used by the sender are set in the DKIM header of every e-mail using the "c" tag. Accepted values are "relaxed" and "simple" and since canonicalization exists for both the header and the body of an e-mail, the format used to represent the canonicalization setting is "value/value" for header and body respectively. 
 
-We currently advise against the "simple/simple" canonicalization setting because this (being the most strict setting) tolerates almost no modification of the header and body before signing, which is prone to cause problems when forwarding mail. This is confirmed in RFC 7960 [section 2.3](https://tools.ietf.org/html/rfc7960#section-2.3) and [section 4.1.1.2](https://tools.ietf.org/html/rfc7960#section-4.1.1.2). Therefore we recommend to use the "relexed/relaxed" setting which tolerates common modifications of the header and body before signing. 
+We currently advise against the "simple/simple" canonicalization setting because this (being the most strict setting) tolerates almost no modification of the header and body before signing, which is prone to cause problems when forwarding mail. This is confirmed in RFC 7960 [section 2.3](https://tools.ietf.org/html/rfc7960#section-2.3) and [section 4.1.1.2](https://tools.ietf.org/html/rfc7960#section-4.1.1.2). Therefore we recommend to use the "relaxed/relaxed" setting which tolerates common modifications of the header and body before signing. 
 
 Notice: 
 * When not specified DKIM canoncalization defaults to "strict/strict". 

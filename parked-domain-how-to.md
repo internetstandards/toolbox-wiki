@@ -31,8 +31,12 @@ Set DMARC policy to reject mails, but allow reporting to take place. This helps 
 `_dmarc.example.nl. IN TXT "v=DMARC1; p=reject; rua=mailto:rua@example.nl; ruf=mailto:ruf@example.nl"`
 
 If the domain itself does not receive email (such as when the domain has been configured with NULL MX), then the RUA and RUF must point to another domain that does receive emails, such as:
-`_dmarc.example.nl TXT "v=DMARC1; p=reject; rua=mailto:rua@example.net; ruf=mailto:ruf@example.net"
-example.nl._report._dmarc.example.net TXT "v=DMARC1"`
+
+`_dmarc.example.nl TXT "v=DMARC1; p=reject; rua=mailto:rua@example.net; ruf=mailto:ruf@example.net"`
+
+On the other domain (that does receive e-mail), add an authorization record for the parked domain:
+
+`example.nl._report._dmarc.example.net TXT "v=DMARC1;"`
 
 ## DKIM
 When using a wildcard selector to set an empty public key, you indicate that all previously used keys are revoked and must be considered unreliable. You can also use this to explicitly signal that a domain is not configured to use e-mail. However, [according to the RFC](https://tools.ietf.org/html/rfc6376#section-6.1.2) the absence of a selector / public key (e.g. as a result of deleting the entire DKIM resource record) is semantically equal to a resource record with an empty public key. This means that both approaches should be treated similar by the receiving mail server.

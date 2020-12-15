@@ -131,12 +131,13 @@ Create the file **/etc/opendkim/signing_table** and add the following line:
 Start OpenDKIM and check your logfiles for possible errors.
 
 #### Key rotation
-OpenDKIM does not support the automated rotation of DKIM keys. This means that you should rotate your keys manually, write a script to do this, or use an existing script like [https://github.com/tetsuo13/OpenDKIM-Rotate-Keys](https://github.com/tetsuo13/OpenDKIM-Rotate-Keys) or (https://github.com/captbrando/dkimrotator)[https://github.com/captbrando/dkimrotator].
+OpenDKIM does not support the automated rotation of DKIM keys. This means that you should rotate your keys manually, write a script to do this, or use an existing script like [https://github.com/tetsuo13/OpenDKIM-Rotate-Keys](https://github.com/tetsuo13/OpenDKIM-Rotate-Keys) or [https://github.com/captbrando/dkimrotator](https://github.com/captbrando/dkimrotator).
 
 ### Publish the DNS record
 
 Make sure to add the following lines to you domain's zone file:
 > selector201906._domainkey IN TXT "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCooJQftNOg3wOqVW5wOpr1PhhzgeP1IE9dTOtpUOCENP+z1HwP+8fFp9aGo/EKHoDQRhDUxXlVfocmRjb0lyjHD5ax16BBKLAd8+AgHZt1er8fmm2cL+7nurv0vU5YBG9LGUklD9qO/zJrIz+Lp+YO7D2rt0qYAgGzUOLJBWLBNQIDAQAB"
+
 > _adsp._domainkey IN TXT "dkim=all"
 
 The first line publishes the selector and the associated public key. The second line tells receiving mail server that all e-mail coming from the domain example.nl are DKIM signed.

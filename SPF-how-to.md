@@ -31,6 +31,7 @@ Our current e-mail infrastructure was originally designed for any mail sending h
 * Parked domains should be explicitly configured to not use e-mail. For SPF this is done with an empty policy (not mentioning any ip-adresses or hostnames which are allowed to send mail) and a hard fail: "v=spf1 –all".
 * When processing incoming mail we advise to favor a DMARC policy over an SPF policy. Do not configure SPF rejection to go into effect early in handling, but take full advantage of the enhancements DMARC is offering. A message might still pass based on DKIM.
   * At the same time, be aware that some operaters still allow a hard fail (-all) to go into effect early in handling and skip DMARC operations. 
+* As stated in [section 5.2 of the RFC](https://tools.ietf.org/html/rfc7208#section-5.2) the _include_ mechanism is not applicable to the _all_ mechanism within the referenced record. This means that an SPF record's default policy is not 'inherited' upon inclusion. When including one or more SPF records from other domains, a default policy (~all or -all) is still required. For fully 'inheriting' another domain's SPF record, consider using the [_redirect_ modifier](https://tools.ietf.org/html/rfc7208#section-6.1).
 
 # Outbound e-mail traffic (DNS records)
 SPF for outbound e-mail traffic is limited to publishing an SPF policy as a TXT-record in a domain name's DNS zone. This enables other parties to use SPF for validating the authenticity of e-mail servers sending e-mail on behalf of your domain name. 

@@ -211,7 +211,7 @@ This section describes several pionts for attention when implementing DANE for S
 * Some software allows for a test mode. This means that DANE verification is done and logged but there’s no consequence for delivery if DANE verification fails.
 * Manually verify a mail server's certificate with the following commands:
   * get the DANE record: `dig tlsa _25._tcp.mail.example.nl`
-  * verify certificate against TLSA record `openssl s_client -starttls smtp -connect mail.example.nl:25 -dane_tlsa_domain "example.nl" -dane_tlsa_rrdata "3 1 1 29c8601cb562d00aa7190003b5c17e61a93dcbed3f61fd2f86bd35fbb461d084"`.
+  * verify certificate against TLSA record `openssl s_client -starttls smtp -connect mail.example.nl:25 -dane_tlsa_domain "mail.example.nl" -dane_tlsa_rrdata "3 1 1 29c8601cb562d00aa7190003b5c17e61a93dcbed3f61fd2f86bd35fbb461d084"`.
 * Check if DANE TLSA records (_25._tcp.mail.example.nl) are properly DNSSEC signed. A regularly occuring mistake is the presence of "proof of non-existence" (NSEC3) for the ancestor domain (_tcp.mail.example.nl). If this happens then resolvers that use qname minimization (like the resolver used by [Internet.nl](https://internet.nl)) think that _25._tcp.mail.example.nl does not exists since _tcp.mail.example.nl does not exists. Therefore the resolver can't get the TLSA record which makes DANE fail. 
   * Check your DNSSEC implementation on [DNSViz](https://dnsviz.net/). Enter "_25._tcp.mail.example.nl".
   * You can also manually check for this error. `dig _25._tcp.mail.example.nl tlsa +dnssec` results in a NOERROR response, while `dig _tcp.mail.example.nl tlsa +dnssec` results in a NXDOMAIN response. 

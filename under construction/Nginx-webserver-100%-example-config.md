@@ -1,7 +1,7 @@
 <img align="right" src="/images/logo-internetnl-en.svg">
 
 # Ngnix example configuration
-This example configuration was created by SIDN Labs and show how to configure Ngnix in order to score 100% in the Website test on Internet.nl. 
+This example configuration was created by SIDN Labs and shows how to configure Ngnix in order to score 100% in the Website test on Internet.nl. 
 
 # Assumptions
 * DNSSEC is used
@@ -98,8 +98,3 @@ This example configuration was created by SIDN Labs and show how to configure Ng
             uwsgi_ignore_client_abort on;
         }
     }
-
-
-
-
-

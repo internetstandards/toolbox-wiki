@@ -13,6 +13,6 @@ Feedback and/or contributions are much appreciated and welcome through issues, p
 [DMARC how-to](https://github.com/internetstandards/toolbox-wiki/blob/master/DMARC-how-to.md)  
 [Parked domain how-to](https://github.com/internetstandards/toolbox-wiki/blob/master/parked-domain-how-to.md)  
 
-# Other interesting external sources
+# Interesting external sources
 [SIDN Hands-on guides](https://www.sidn.nl/en/cyber-security/modern-internet-standards)  
 [The Internet Society's Open Standards Everywhere Project](https://github.com/InternetSociety/ose-documentation)

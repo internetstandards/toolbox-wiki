@@ -114,8 +114,8 @@ Note that MTA-STA and DANE can co-exists next to each other. They intentionally 
 **Usage**: says something about the type of certificate that is used for this TLSA record.  
 0: PKIX-TA (not recommended / [not used for SMTP](https://tools.ietf.org/html/rfc7672#section-3.1.3))  
 1: PKIX-EE (not recommended / [not used for SMTP](https://tools.ietf.org/html/rfc7672#section-3.1.3))  
-2: DANE-TA: intermediate / root certificate  (recommended)  
-3: DANE-EE: end-entity certificate (also called 'host certificate' or 'server certificate') (recommended)  
+2: DANE-TA: intermediate / root certificate (OK)  
+3: DANE-EE: end-entity certificate (also called 'host certificate' or 'server certificate') (OK)  
 
 **Selector**: this is about the scope of the fingerprint regarding this TLSA record.  
 0: fingerprint with regard to the full certificate  (not recommended / [to be avoided](http://dnssec-stats.ant.isi.edu/~viktor/x3hosts.html))  

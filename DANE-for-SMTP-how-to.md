@@ -17,8 +17,8 @@ This how-to is created by the Dutch Internet Standards Platform (the organizatio
 - [Why use DANE for SMTP?](#why-use-dane-for-smtp-)
   * [Risks of SMTP with opportunistic TLS](#risks-of-smtp-with-opportunistic-tls)
   * [DANE addresses these risks](#dane-addresses-these-risks)
-  * [How about MTA-STS?](#how-about-mta-sts)
-- [DANE TLSA record example](#dane-tlsa-record-example)
+  * [How about MTA-STS?](#how-about-mta-sts-)
+- [DANE TLSA record structure](#dane-tlsa-record-structure)
 - [Advantages of DANE explained by illustrations](#advantages-of-dane-explained-by-illustrations)
   * [Mail delivery: TLS without DANE](#mail-delivery--tls-without-dane)
   * [Mail delivery: TLS with MITM stripping TLS](#mail-delivery--tls-with-mitm-stripping-tls)
@@ -108,21 +108,23 @@ In view of the foregoing and considering the facts that the Dutch NCSC [advises]
 
 Note that MTA-STA and DANE can co-exists next to each other. They intentionally do not interfere.
 
-# DANE TLSA record example
+# DANE TLSA record structure
 ![](images/DANE-example-TLSA-record.png)
 
 **Usage**: says something about the type of certificate that is used for this TLSA record.  
-2: intermediate / root certificate  
-3: end-entity certificate (also called 'host certificate' or 'server certificate')
+0: PKIX-TA (not recommended / [not used for SMTP](https://tools.ietf.org/html/rfc7672#section-3.1.3))  
+1: PKIX-EE (not recommended / [not used for SMTP](https://tools.ietf.org/html/rfc7672#section-3.1.3))  
+2: DANE-TA: intermediate / root certificate  (recommended)  
+3: DANE-EE: end-entity certificate (also called 'host certificate' or 'server certificate') (recommended)  
 
 **Selector**: this is about the scope of the fingerprint regarding this TLSA record.  
-0: fingerprint with regard to the full certificate  
-1: fingerprint with regard to the public key  
+0: fingerprint with regard to the full certificate  (not recommended / [to be avoided](http://dnssec-stats.ant.isi.edu/~viktor/x3hosts.html))  
+1: fingerprint with regard to the public key (recommended)  
 
 **Matching-Type**: information about the hashing mechanism used for fingeeprint regarding this TLSA record.  
-0: no hasing, full information  
-1: SHA2-256 hash  
-2: SHA2-512 hash  
+0: no hasing, full information (not recommended / [to be avoided](https://tools.ietf.org/html/rfc7672#section-3.1.2))  
+1: SHA2-256 hash ([recommended](https://tools.ietf.org/html/rfc7672#section-3.1.1))  
+2: SHA2-512 hash (not recommended / [less supported](https://www.rfc-editor.org/rfc/rfc6698.html#section-6))  
 
 # Advantages of DANE explained by illustrations
 ## Mail delivery: TLS without DANE

@@ -39,7 +39,7 @@ SPF for outbound e-mail traffic is limited to publishing an SPF policy as a TXT-
 The example below shows an SPF record with a **hard fail**.
 > v=spf1 mx ip4:192.168.1.1/32 ip6:fd12:3456:789a:1::/64 a:mail.example.com a:mail2.example.com -all"
 
-Although a soft fail (~all) is recommended in order to prevent false positives, a hard fail (-all) cloud decreases the load on the receiving party's e-mail infrastructure (depending on their configuration) since the e-mail can be dropped immediately when the e-mail is send by a host or IP-address that is not listed in the SPF record.
+Although a soft fail (~all) is recommended in order to prevent false positives, a hard fail (-all) could decreases the load on the receiving party's e-mail infrastructure (depending on their configuration) since the e-mail can be dropped immediately when the e-mail is send by a host or IP-address that is not listed in the SPF record.
 
 # Inbound e-mail traffic 
 Ideally incoming e-mail is processed by making a **single decision** based on a collective evaluation of all relevant e-mail standards (SPF, DKIM, DMARC). Although this would be the most elegant way of processing incoming e-mail, most e-mail servers process e-mail standards in a sequential order. This should be taken into consideration when configuring your own e-mail environment; depending on a domain owner's preferences it is also possible to implement a "single decision" e-mail environment.

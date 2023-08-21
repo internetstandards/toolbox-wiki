@@ -83,7 +83,7 @@ DMARC for outbound e-mail traffic can be accomplished by publishing a DMARC poli
 ### Setting up a DMARC record
 Depending on your preferences and needs, you can determine the value of the configuration tags. The values below seem like a good starting point when setting up DMARC.
 
-    _dmarc IN TXT "v=DMARC1; p=quarantine; rua=mailto:dmarc@example.nl; ruf=mailto:dmarc@example.nl; fo=0; adkim=r; aspf=r; pct=100; rf=afrf; ri=86400; sp=quarantine"
+    _dmarc IN TXT "v=DMARC1; p=quarantine; rua=mailto:dmarc@example.nl; ruf=mailto:dmarc@example.nl; fo=1; adkim=r; aspf=r; pct=100; rf=afrf; ri=86400; sp=quarantine"
     
 Because this specific setup uses SpamAssassin for classifying e-mail to be SPAM or legitimate (HAM), the DMARC policy used is quarantine. This is done to prevent OpenDMARC from blocking the e-mail and, as a result, not enabling SpamAssassin to do its job.
 

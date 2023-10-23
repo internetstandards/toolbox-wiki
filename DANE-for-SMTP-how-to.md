@@ -56,6 +56,11 @@ This how-to is created by the Dutch Internet Standards Platform (the organizatio
   * [Generic configuration](#generic-configuration-1)
     + [Configure the use of DANE on the domain level](#configure-the-use-of-dane-on-the-domain-level)
     + [Logging](#logging-1)
+- [Implementing DANE for SMTP on Stalwart SMTP (outbound e-mail traffic)](#implementing-dane-for-smtp-on-stalwart-smtp-outbound-e-mail-traffic)
+  - [Outbound](#outbound)
+  - [DANE TLS Reporting](#dane-tls-reporting)
+    - [Outbound reports](#outbound-reports)
+    - [Inbound report analysis](#inbound-report-analysis)
 - [Special thanks](#special-thanks)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
@@ -545,6 +550,78 @@ TLS Logging
 tls: TLSv1.2 connected with 256-bit ECDHE-RSA-AES256-GCM-SHA384
 tls: cert: /C=NL/ST=Zuid-Holland/L=Den Haag/XXXXXXX; issuer=/C=NL/O=XXXXXXX; verified=yes
 tls: DANE match: /C=NL/ST=Zuid-Holland/L=XXXXXX; issuer=XXXXX; depth=0
+```
+
+# Implementing DANE for SMTP on Stalwart SMTP (outbound e-mail traffic)
+
+Stalwart SMTP includes built-in support for strong transport security mechanisms such as DANE, MTA-STS (Mail Transfer Agent Strict Transport Security) and SMTP TLS Reporting.
+
+**Specifics for this setup**
+* Stalwart SMTP v0.1 (or greater)
+
+**Assumptions**
+* Basic configuration of Stalwart SMTP
+
+## Outbound
+
+DANE can be enabled in Stalwart SMTP with the `queue.outbound.tls.dane` property which accepts the following values:
+
+- `optional`: Use DANE only if TLSA records for the domain are available.
+- `require`: Require DANE and do not perform delivery unless a valid TLSA record is available (not recommended unless used under a custom rule).
+- `disable`: Never use DANE.
+
+Example:
+
+```
+[queue.outbound.tls]
+dane = "optional"
+```
+
+## DANE TLS Reporting
+
+SMTP TLS Reporting is a mechanism for reporting on the certificate and DANE validation outcomes performed by a mail transfer agent (MTA), such as Stalwart SMTP. It allows the recipient of an email to receive reports on DANE policies and the validity of the certificate used to secure the transport of the email, including information such as whether the certificate was valid, expired, or revoked.
+
+### Outbound reports
+
+Stalwart SMTP can generate TLS aggregate reports to inform other hosts about the results of DANE validation. Outgoing TLS reports are configured under the `report.tls.aggregate` key using the following options:
+
+- `from-name`: The name that will be used in the `From` header of the TLS report email.
+- `from-address`: The email address that will be used in the `From` header of the TLS report email.
+- `org-name`: The name of the organization to be included in the report.
+- `send`: The frequency at which the TLS reports will be sent. The options are `hourly`, `daily`, `weekly`, or `never` to disable reporting.
+- `max-size`: The maximum size of the TLS report in bytes.
+- `sign`: The list of DKIM signatures to use when signing the TLS report. 
+
+Example:
+
+```
+[report.tls.aggregate]
+from-name = "TLS Report"
+from-address = "noreply-tls@foobar.org"
+org-name = "The Foobar Organization"
+contact-info = "jane@foobar.org"
+send = "daily"
+max-size = 26214400 # 25 mb
+sign = ["rsa"]
+```
+
+### Inbound report analysis
+
+Stalwart SMTP has the ability to automatically analyze incoming TLS reports including DANE authentication results that are sent by other domains, which eliminates the need for manual intervention and saves time and effort for the system administrator. In case any DANE authentication issues are found, an event is recorded in the log file or sent to OpenTelemetry. By turning reports into actionable events, system administrators can quickly detect and respond to configuration errors and any instances of abuse, such as spam or phishing, which helps to maintain the integrity of the email system.
+
+The configuration for report analysis can be found under the `report.analysis` key and includes the following attributes:
+
+- `addresses`: A list of addresses (which may include wildcards) from which reports will be intercepted and analyzed.
+- `forward`: Whether reports should be forwarded to their final recipient after analysis.
+- `store`: The location where incoming reports will be stored. If no path is specified, the reports will not be stored.
+
+Example:
+
+```
+[report.analysis]
+addresses = ["dmarc@*", "abuse@*"]
+forward = true
+store = "/usr/local/stalwart-smtp/incoming"
 ```
 
 # Special thanks

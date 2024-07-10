@@ -80,23 +80,23 @@ The way SMTP was designed including the usage of opportunistic TLS (via STARTTLS
     - In MTA-to-MTA SMTP, server hostnames for the destination domain are obtained indirectly via DNS MX lookups, but, without DNSSEC, these names cannot be trusted.  As a result, it was unclear which names to verify in the certificate.
 
 As as result, even when STARTTLS is used, a man in the middle attacker:
-* can strip the STARTTLS capability send by the receiving mail server because this communication takes place without the use of encryption. 
-* can insert any certificate of his choice in the in the unencrypted communication and use it to intercept the traffic.
+* can strip the STARTTLS capability sent by the receiving mail server because this communication takes place without the use of encryption. 
+* can insert any certificate of their choice in the unencrypted communication and use it to intercept the traffic.
 
 ## DANE addresses these risks
 The risks of SMTP with opportunistic TLS can be mitigated by using DANE:
 * The presence of a DNS TLSA record for the receiving domain's mail server, should be interpreted by the sending mail server as the capability to use TLS. The use of TLS can therefore be forced when communicating with the receiving domain's mail server.
 * The operator of the receiving domain's mail server is obligated to ensure that any published TLSA records at all times match the server's certificate chain, and that STARTTLS is enabled and working. This makes it possible for the sending domain's mail server to validate the certificate offered by the receiving domain's mail server.
 
-In short: DANE allows sending mail servers to unconditionally require STARTTLS with a matching certificate chain. Otherwise, the sending mail server aborts the connection and tries another server or defers the message. Receiving servers with published TLSA records, are therefore no longer vulnerable to the afore mentioned man in the middle attacks.
+In short: DANE allows sending mail servers to unconditionally require STARTTLS with a matching certificate chain. Otherwise, the sending mail server aborts the connection and tries another server or defers the message. Receiving servers with published TLSA records are therefore no longer vulnerable to the aforementioned man in the middle attacks.
 
 ## How about MTA-STS?
 Internet.nl currently does not include MTA-STS in its tests. This paragraph explains why this is the case. 
 
 First you need to understand that, as [explained on our website](https://en.internet.nl/faqs/report/), the selection and development of tests performed by internet.nl is primairily based on:
 * the [‘comply-or-explain’ list](https://www.forumstandaardisatie.nl/open-standaarden) of the Dutch Standardisation Forum which is mandatory for all Dutch government agencies;
-* security advices of the Dutch NCSC;
-* relevant RFC’s of IETF.
+* security advice of the Dutch NCSC;
+* relevant RFCs of IETF.
 
 Final decisions in this area are made by our steering committee.
 
@@ -142,8 +142,8 @@ The illustration below shows what happens when an attacker performs a man in the
 ## Mail delivery: TLS with MITM using evil certificate 
 The illustration below shows what happens when an attacker performs a man in the middle (MITM) attack and inserts its own certificate into the connection process.
 
-* Traditional SMTP protocol design does not offer any means for a sending server to automatically verify it communicates with the right server. As a result an attacker may fool the sending server to hand over the message to a server under the attackers control. This is called a man-in-the-middle attack, because the attacker places the bad server between the sending and the good receiving server.
-* To accieve this the attacker would configure the bad server to identify as the good receiving server. It would even use a TLS certificate that identifies with the name of the good server. The attacker would then poison the sending servers DNS telling it to go to the bad server whenever it wants to send messages to the good one. The fooled server would hand over all messages to the man-in-the-middle server.
+* Traditional SMTP protocol design does not offer any means for a sending server to automatically verify it communicates with the right server. As a result an attacker may fool the sending server to hand over the message to a server under the attacker's control. This is called a man-in-the-middle attack, because the attacker places the bad server between the sending and the good receiving server.
+* To achieve this the attacker would configure the bad server to identify as the good receiving server. It would even use a TLS certificate that identifies with the name of the good server. The attacker would then poison the sending servers DNS telling it to go to the bad server whenever it wants to send messages to the good one. The fooled server would hand over all messages to the man-in-the-middle server.
 
 ![](images/dane-example-1-evilcert.png)
 
@@ -159,7 +159,7 @@ The illustration below shows how the use of DANE can protect against man in the 
 Although guaranteeing reliable DNS resolving is actually an advantage of DNSSEC, it is still worth mentioning here. Notice that in the example above (TLS with DANE) the lack of DNSSEC would make it possible for an attacker to alter DNS responses (2 and 4). Such an attack can be used to trick the sender into sending e-mail to a rogue e-mail server. 
 
 # Reliable certificate rollover
-A TLSA record identifies a certificate. If the certificate is exchanged for a new one also the associated TLSA record needs to be updated. Otherwise there will be a mismatch, verification will fail and DANE aware servers will not send messages to the receivers domain.
+A TLSA record identifies a certificate. If the certificate is exchanged for a new one also the associated TLSA record needs to be updated. Otherwise there will be a mismatch, verification will fail and DANE aware servers will not send messages to the receiver's domain.
 
 Usually this creates the intent not to exchange the certificate at all. But this collides with best-practices to replace crytographic material – certificates and keys – from time to time.
   
@@ -181,7 +181,7 @@ Two ways of handling certificate rollover are known to work well, in combination
 
 ## Points of attention when rolling over using "current + next"
 * With the "current + next" approach, the second key pair (of which the public key can be used for the **next** TLSA "3 1 1" fingerprint) can be created / known in advance of obtaining the corresponding certificate for *that* key. In particular, if keys are rotated often enough (every 30 to 90 days or so), the next key can be pre-generated as soon as the previous key and certificate are deployed. This allows plenty of time to publish the corresponding **next** "3 1 1" TLSA record to replace the legacy record for the decommissioned key. The process begins again with another "next" key generated right away.
-* Deployment of a new certificate and key must be predicated (automated check) on the corresponding TLSA "3 1 1" record being in place for some time, not only on the primary DNS nameserver, but also on all secondary nameservers. Explicit queries against all the servers are to check for this are highly recommended.
+* Deployment of a new certificate and key must be predicated (automated check) on the corresponding TLSA "3 1 1" record being in place for some time, not only on the primary DNS nameserver, but also on all secondary nameservers. Explicit queries against all the servers to check for this are highly recommended.
 * Some servers have keys and certificates for multiple public key algorithms (e.g. both RSA and ECDSA). In that case, not all clients will negotiate the same algorithm and see the same key. This means that a single "3 1 1" record cannot match the server's currently deployed certificate chains. Consequently, for such servers the "3 1 1" current + "3 1 1" next TLSA records need to be provisioned separately for each algorithm. Failure to do that can result in hard to debug connectivity problems with some sending systems and not others.
 * Use of the same key (and perhaps wildcard certificate) across all of a domain's SMTP servers (all MX hosts) is **not** recommended. Such keys and certificates tend to be rotated across all the servers at the same time, and any deployment mistakes then lead to an outage of inbound email. Large sites with proper monitoring and carefully designed and automated rollover processes can make wildcard certificates work, but if in doubt, don't overestimate your team's ability to execute this flawlessly.
 * When monitoring your systems, test every IPv4 and IPv6 address of each MX host, not all clients will be able connect to every address, and none should encounter incorrect TLSA records, neglected certificates, or even non-working STARTTLS. Also test each public key algorithm, or stick to just one. All DANE-capable SMTP servers support both RSA and ECDSA P-256, so you can pick just RSA (2048-bit key) or ECDSA (P-256).
@@ -198,7 +198,7 @@ This section describes several pionts for attention when implementing DANE for S
   * It is possible to use self-signed certificates. 
   * [Section 3.2 of RFC 7672](https://tools.ietf.org/html/rfc7672#section-3.2) states that SMTP clients **must not** perform certificate name checks when using an end-entity certificate (usage type 3). However, it also states that SMTP clients **must** perform certificate name checks when using an intermediate or root certificate (usage type 2). The latter is necessary to prevent attackers from abusing a random intermediate or root certificate to falsely validate their evil mail servers.  
   * [Section 3.1 of RFC 7672](https://tools.ietf.org/html/rfc7672#section-3.1) states that the expiration date of the end-entity certificate MUST be ignored.
-* It is highly recommended to use a certificates public key for generating a TLSA signature (selector type "1") instead of the full certificate (selector type "0"), because this enables the reuse of key materials. Although it is wise to refresh your key material once in a while, note that the use of Forward Secrecy decreases the need to use a new key-pair on every occasion. 
+* It is highly recommended to use a certificate's public key for generating a TLSA signature (selector type "1") instead of the full certificate (selector type "0"), because this enables the reuse of key materials. Although it is wise to refresh your key material once in a while, note that the use of Forward Secrecy decreases the need to use a new key-pair on every occasion. 
   * See also this [example of Let's Encrypt](https://mail.sys4.de/pipermail/dane-users/2019-December/000545.html). In this case the issuer certificate was changed, but the public key was not. As a result a "2 1 1" roll-over record would still validate, but a "2 0 1" roll-over record would not and requires an update. 
 * An issuer certificate (usage type "2") validates only when the full certificate chain is offered by the receiving mail server. 
 * Mail servers by default don't validate certificates and therefore don't have their own certificate store. That's why DANE for SMTP only supports usage type "2" (DANE-TA) and usage type "3" (DANE-EE). Usage type "0" (PKIX-TA) and usage type "1" (PKIX-EE) are not supported. 
@@ -207,14 +207,14 @@ This section describes several pionts for attention when implementing DANE for S
 * In case of roll-over scheme "current + issuer", the use of the root certificate is preferred because in some contexts ([PKIoverheid](https://en.wikipedia.org/wiki/PKIoverheid)) this makes it easier to switch supplier / certificate without impacting DANE. (Remember [DigiNotar](https://en.wikipedia.org/wiki/DigiNotar)). 
 * Roll-over scheme "current + next" gives less flexibility but the highest form of certainty, because of "tight pinning".
 * Implement monitoring of your DANE records to be able to detect problems as soon as possible. 
-* Make sure your implementation supports the usage of a CNAME in your MX record. There are some inconsistencies between multiple RFC's. According to [RFC 2181](https://tools.ietf.org/html/rfc2181#section-10.3) a CNAME in MX records is not allowed, while [RFC 7671](https://tools.ietf.org/html/rfc7671#section-7) and [RFC 5321](https://tools.ietf.org/html/rfc5321#section-5.1) imply that the usage of a CNAME in MX records is allowed.
+* Make sure your implementation supports the usage of a CNAME in your MX record. There are some inconsistencies between multiple RFCs. According to [RFC 2181](https://tools.ietf.org/html/rfc2181#section-10.3) a CNAME in MX records is not allowed, while [RFC 7671](https://tools.ietf.org/html/rfc7671#section-7) and [RFC 5321](https://tools.ietf.org/html/rfc5321#section-5.1) imply that the usage of a CNAME in MX records is allowed.
 * Using Server Name Indication (SNI) in an e-mail environment (for matching the certificate offered by a recieving e-mail server) is only usefull when DANE and DNSSEC are used. DNSSEC to perform a reliable MX lookup and DANE to verify the authenticity of the certificate. Sending e-mail servers (the TLS client) usually don't use SNI, because some receiving e-mail servers (the TLS server) cannot handle this; in some cases the setting up of a TLS connection fails. For more information see [RFC 7672 section 8.1](https://tools.ietf.org/html/rfc7672#section-8.1) and [this blogpost by Filippo Valsorda](https://blog.filippo.io/the-sad-state-of-smtp-encryption/). 
 * Make sure you keep an eye on the logs of your sending mail server to see what domains fail DANE verification.
 * Some software allows for a test mode. This means that DANE verification is done and logged but there’s no consequence for delivery if DANE verification fails.
 * Manually verify a mail server's certificate with the following commands:
   * get the DANE record: `dig tlsa _25._tcp.mail.example.nl`
   * verify certificate against TLSA record `openssl s_client -starttls smtp -connect mail.example.nl:25 -dane_tlsa_domain "mail.example.nl" -dane_tlsa_rrdata "3 1 1 29c8601cb562d00aa7190003b5c17e61a93dcbed3f61fd2f86bd35fbb461d084"`.
-* Check if DANE TLSA records (_25._tcp.mail.example.nl) are properly DNSSEC signed. A regularly occuring mistake is the presence of "proof of non-existence" (NSEC3) for the ancestor domain (_tcp.mail.example.nl). If this happens then resolvers that use qname minimization (like the resolver used by [Internet.nl](https://internet.nl)) think that _25._tcp.mail.example.nl does not exists since _tcp.mail.example.nl does not exists. Therefore the resolver can't get the TLSA record which makes DANE fail. 
+* Check if DANE TLSA records (_25._tcp.mail.example.nl) are properly DNSSEC signed. A regularly occuring mistake is the presence of "proof of non-existence" (NSEC3) for the ancestor domain (_tcp.mail.example.nl). If this happens then resolvers that use qname minimization (like the resolver used by [Internet.nl](https://internet.nl)) think that _25._tcp.mail.example.nl does not exist since _tcp.mail.example.nl does not exists. Therefore the resolver can't get the TLSA record which makes DANE fail. 
   * Check your DNSSEC implementation on [DNSViz](https://dnsviz.net/). Enter "_25._tcp.mail.example.nl".
   * You can also manually check for this error. `dig _25._tcp.mail.example.nl tlsa +dnssec` results in a NOERROR response, while `dig _tcp.mail.example.nl tlsa +dnssec` results in a NXDOMAIN response. 
 
@@ -286,7 +286,7 @@ This results in the following output:
 Since both certificates for the primary and secondary come from the same Certificate Authority, they both have the same root certificate. So we don't have to repeat this with a different bundle file.
 
 Now that we have the SHA-256 hash, we can construct the DANE roll-over DNS records. We make the following configuration choices:
-* Usage field is "**2**"; we generated a DANE hash of the root certificate which is in the chain the chain of trust of the actual leaf certificate (DANE-TA: Trust Anchor Assertion). 
+* Usage field is "**2**"; we generated a DANE hash of the root certificate which is in the chain of trust of the actual leaf certificate (DANE-TA: Trust Anchor Assertion). 
 * Selector field is "**1**"; because we use the root certificate's public key to generate a DANE hash.
 * Matching-type field is "**1**"; because we use SHA-256.
 

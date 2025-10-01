@@ -46,7 +46,7 @@ When using a wildcard selector to set an empty public key, you indicate that all
 ## SPF
 Set an an empty policy (not mentioning any ip-adresses or hostnames which are allowed to send mail) and a hard fail.
 
-`example.nl. IN TXT "v=spf1 –all"`
+`example.nl. IN TXT "v=spf1 -all"`
  
 # Domain without a website
 Apply the following settings to domains not using a website.

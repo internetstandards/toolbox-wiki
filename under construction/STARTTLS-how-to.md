@@ -16,7 +16,7 @@ Under construction
 
 # Tips, tricks and notices for implementation
 * http://postfix.1071664.n5.nabble.com/Disable-SSL-TLS-renegotiation-td96864.html#a96871
-* Use the RFC 7919 defined DH groups: https://raw.githubusercontent.com/internetstandards/dhe_groups/master/ffdhe4096.pem)
+* Use the RFC 7919 defined DH groups: https://raw.githubusercontent.com/internetstandards/dhe_groups/main/ffdhe4096.pem)
 
 ## Implementing STARTTLS in Postfix
 **Specifics for this setup**

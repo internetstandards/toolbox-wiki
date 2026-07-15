@@ -56,6 +56,11 @@ This how-to is created by the Dutch Internet Standards Platform (the organizatio
   * [Generic configuration](#generic-configuration-1)
     + [Configure the use of DANE on the domain level](#configure-the-use-of-dane-on-the-domain-level)
     + [Logging](#logging-1)
+- [Implementing DANE for SMTP on Stalwart SMTP (outbound e-mail traffic)](#implementing-dane-for-smtp-on-stalwart-smtp-outbound-e-mail-traffic)
+  - [Outbound](#outbound)
+  - [DANE TLS Reporting](#dane-tls-reporting)
+    - [Outbound reports](#outbound-reports)
+    - [Inbound report analysis](#inbound-report-analysis)
 - [Special thanks](#special-thanks)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
@@ -63,12 +68,12 @@ This how-to is created by the Dutch Internet Standards Platform (the organizatio
 # What is DANE?
 DANE is short for "**D**NS-based **A**uthentication of **N**amed **E**ntities" and is described in [RFC 6698](https://tools.ietf.org/html/rfc6698) with "updates and operational guidance" in [RFC 7671](https://tools.ietf.org/html/rfc7671). DANE establishes a downgrade-resistant method to verify an SMTP servers identity **before** it starts to transport an email message over a STARTTLS encrypted layer. In order to achieve this it uses verification information retrieved from the recipients DNSSEC signed DNS zone. DANE does not rely on additional trusted parties outside the delegation chain in DNS. 
 
-DANE, as a method, has been designed to work with any TLS service. DANE for SMTP (which is described in [RFC 7672](https://tools.ietf.org/html/rfc7672)) implements the DANE method for SMTP. It is used increasingly and adds active attack (man-in-the-middle) resistance to SMTP transport encryption [RFC 7672 Section 1.3](https://tools.ietf.org/rfc7672#section-1.3). DANE for SMTP uses the presence of DNS TLSA ressource records to **securely signal TLS support** and to publish the means by which SMTP clients can successfully **authenticate legitimate SMTP servers**. The result is called "opportunistic DANE TLS", and resists downgrade and man-in-the-middle (MITM) attacks when the destination domain and its MX hosts are DNSSEC signed, and TLSA records are published for each MX host. While possible, DANE for HTTP is not presently supported by the major browsers and so has seen little deployment.
+DANE, as a method, has been designed to work with any TLS service. DANE for SMTP (which is described in [RFC 7672](https://tools.ietf.org/html/rfc7672)) implements the DANE method for SMTP. It is used increasingly and adds active attack (man-in-the-middle) resistance to SMTP transport encryption [RFC 7672 Section 1.3](https://tools.ietf.org/rfc7672#section-1.3). DANE for SMTP uses the presence of DNS TLSA resource records to **securely signal TLS support** and to publish the means by which SMTP clients can successfully **authenticate legitimate SMTP servers**. The result is called "opportunistic DANE TLS", and resists downgrade and man-in-the-middle (MITM) attacks when the destination domain and its MX hosts are DNSSEC signed, and TLSA records are published for each MX host. While possible, DANE for HTTP is not presently supported by the major browsers and so has seen little deployment.
 
 # Why use DANE for SMTP?
-At this time it is not possible to require **mandatory** transport encryption (TLS) in public mail transport. A mail server might not support transporting messages using encryption. Today only plaintext or **opportunistic** transport encryption are applicable – opportunistic because it is up to the receiving server to decide if it wants to and is able to send messages using TLS (via STARTTLS).
+At this time it is not possible to require **mandatory** transport encryption (TLS) in public mail transport. A mail server might not support transporting messages using encryption. Today only plain text or **opportunistic** transport encryption are applicable – opportunistic because it is up to the receiving server to decide if it wants to and is able to send messages using TLS (via STARTTLS).
 
-DANE offers several advantages by binding X.509 certificates to domains using DNSSEC. In an SMTP context this allows **a)** sending mail servers to securely signal TLS support by the receiving domain's mail server, and **b)** sending mail servers to verify the autenticity of the offered certificate by the receiving domain's mail server. This helps to address risks that occur when using oppurtunistic TLS connections between mail servers.  
+DANE offers several advantages by binding X.509 certificates to domains using DNSSEC. In an SMTP context this allows **a)** sending mail servers to securely signal TLS support by the receiving domain's mail server, and **b)** sending mail servers to verify the authenticity of the offered certificate by the receiving domain's mail server. This helps to address risks that occur when using opportunistic TLS connections between mail servers.  
 
 ## Risks of SMTP with opportunistic TLS
 The way SMTP was designed including the usage of opportunistic TLS (via STARTTLS) is not without risks:
@@ -93,14 +98,14 @@ In short: DANE allows sending mail servers to unconditionally require STARTTLS w
 ## How about MTA-STS?
 Internet.nl currently does not include MTA-STS in its tests. This paragraph explains why this is the case. 
 
-First you need to understand that, as [explained on our website](https://en.internet.nl/faqs/report/), the selection and development of tests performed by internet.nl is primairily based on:
-* the [‘comply-or-explain’ list](https://www.forumstandaardisatie.nl/open-standaarden) of the Dutch Standardisation Forum which is mandatory for all Dutch government agencies;
+First you need to understand that, as [explained on our website](https://en.internet.nl/faqs/report/), the selection and development of tests performed by internet.nl is primarily based on:
+* the [‘comply-or-explain’ list](https://www.forumstandaardisatie.nl/open-standaarden) of the Netherlands Standardisation Forum which is mandatory for all Dutch government agencies;
 * security advice of the Dutch NCSC;
 * relevant RFCs of IETF.
 
 Final decisions in this area are made by our steering committee.
 
-MTA-STS is a fairly new standard for enforcing authenticated transport encryption between mail servers. The standard was developed primarily by the big cloud mail providers and seems to especially meet their specific needs. We have seen [quite some uptake of DANE](https://github.com/baknu/DANE-for-SMTP/wiki/4.-Adoption-statistics) (e.g. by Comcast, Protonmail and Cisco), but until now not by the major cloud mail providers. MTA-STS is relatively complex because it needs an extra HTTPS interface (including certificate validation) to function, and it is also considered to be less secure than DANE due to trust on first use and caching. 
+MTA-STS is a fairly new standard for enforcing authenticated transport encryption between mail servers. The standard was developed primarily by the big cloud mail providers and seems to especially meet their specific needs. We have seen [quite some uptake of DANE](https://github.com/baknu/DANE-for-SMTP/wiki/4.-Adoption-statistics) (e.g. by Comcast, Protonmail, Microsoft 365 and Cisco). MTA-STS is relatively complex because it needs an extra HTTPS interface (including certificate validation) to function, and it is also considered to be less secure than DANE due to trust on first use and caching. 
 
 MTA-STS relies on trust on first use (TOFU) and policy caching. So the initial connection is just STARTTLS (without authentication of the receiving mail server and without enforcing encryption). During that first connection the MTA-STS policy will be cached by the sending mail server and subsequent encrypted connections will be enforced and authenticated (until the policy cache time expires). This caching mechanism means the larger and more up up-to-date the cache, the better MTA-STS will work. Basically big (cloud) mail providers (that contact about every mail server worldwide each day) will have a large up-to-date policy cache, but smaller mail providers will not and therefore will run more often into trust on first use (i.e. initial less secure connection). So basically MTA-STS seems to offer better security to big players than to the smaller ones. In fact, the MTA-STS RFC [states](https://tools.ietf.org/html/rfc8461#section-10) that DANE offers better downgrade resistance. 
 
@@ -121,8 +126,8 @@ Note that MTA-STA and DANE can co-exists next to each other. They intentionally 
 0: fingerprint with regard to the full certificate  (not recommended / [to be avoided](http://dnssec-stats.ant.isi.edu/~viktor/x3hosts.html))  
 1: fingerprint with regard to the public key (recommended)  
 
-**Matching-Type**: information about the hashing mechanism used for fingeeprint regarding this TLSA record.  
-0: no hasing, full information (not recommended / [to be avoided](https://tools.ietf.org/html/rfc7672#section-3.1.2))  
+**Matching-Type**: information about the hashing mechanism used for fingerprint regarding this TLSA record.  
+0: no hashing, full information (not recommended / [to be avoided](https://tools.ietf.org/html/rfc7672#section-3.1.2))  
 1: SHA2-256 hash ([recommended](https://tools.ietf.org/html/rfc7672#section-3.1.1))  
 2: SHA2-512 hash (not recommended / [less supported](https://www.rfc-editor.org/rfc/rfc6698.html#section-6))  
 
@@ -133,7 +138,7 @@ The illustration below shows two TLS capable mail servers without using DANE. Th
 ![](images/dane-example-1-no-dane.png)
 
 ## Mail delivery: TLS with MITM stripping TLS 
-The illustration below shows what happens when an attacker performs a man in the middle (MITM) attack and forces an unsecure connection by stripping the TLS capability from the receiving e-mail server. 
+The illustration below shows what happens when an attacker performs a man in the middle (MITM) attack and forces an insecure connection by stripping the TLS capability from the receiving e-mail server. 
 
 * When an attacker controls the network communication between the sending and receiving server it may downgrade the session by removing the information that indicates the receiving server supports encrypted transport. The sending server would proceed and transport the message unencrypted making all data contained in the message visible to the attacker.
 
@@ -150,8 +155,8 @@ The illustration below shows what happens when an attacker performs a man in the
 ## Mail delivery: TLS with DANE
 The illustration below shows how the use of DANE can protect against man in the middle (MITM) attacks by addressing the shortcomings of TLS without DANE.
 
-* The operator of the receiving server publishes a TLSA record in its DNSSEC signed zone. The mere existence of the record indicates to the sending server that the recieving server **must** offer STARTTLS. Otherwise transport must not take place.
-* The receiving server's TLSA record contains policy information and a string that identifies the correct certificate. Only the good servers certiciate will match these verification criteria. Unless the attacker is also in possesion of the good servers certificate it cannot disguise as good and the man-in-the-middle server will be detected. It the verification data does not match the servers certificate the sending server will not transport the message.
+* The operator of the receiving server publishes a TLSA record in its DNSSEC signed zone. The mere existence of the record indicates to the sending server that the receiving server **must** offer STARTTLS. Otherwise transport must not take place.
+* The receiving server's TLSA record contains policy information and a string that identifies the correct certificate. Only the good servers certificate will match these verification criteria. Unless the attacker is also in possession of the good servers certificate it cannot disguise as good and the man-in-the-middle server will be detected. It the verification data does not match the servers certificate the sending server will not transport the message.
 
 ![](images/dane-example-1-with-dane.png)
 
@@ -161,13 +166,13 @@ Although guaranteeing reliable DNS resolving is actually an advantage of DNSSEC,
 # Reliable certificate rollover
 A TLSA record identifies a certificate. If the certificate is exchanged for a new one also the associated TLSA record needs to be updated. Otherwise there will be a mismatch, verification will fail and DANE aware servers will not send messages to the receiver's domain.
 
-Usually this creates the intent not to exchange the certificate at all. But this collides with best-practices to replace crytographic material – certificates and keys – from time to time.
+Usually this creates the intent not to exchange the certificate at all. But this collides with best-practices to replace cryptographic material – certificates and keys – from time to time.
   
 To satisfy both requirements establish these maintenance procedures:
-* DANE allows to publish multiple TLSA records. As long as one matches the receving servers certificates everything is fine. Publish **two** sets of TLSA records like this:
+* DANE allows to publish multiple TLSA records. As long as one matches the receiving servers certificates everything is fine. Publish **two** sets of TLSA records like this:
   * One TLSA record matching the certificate currently in use.
   * A second TLSA record matching a fallback or future certificate to be used.
-* Wait two rounds of **TTL** before you start using a new certicate. This allows clients to clear their DNS cache and pick up the new TLSA record.
+* Wait two rounds of **TTL** before you start using a new certificate. This allows clients to clear their DNS cache and pick up the new TLSA record.
 * Once the new certificate has been deployed, tested and all is well, the legacy TLSA records may be dropped. Notice that removing the legacy TLSA record too soon can cause an outage. 
 
 Two ways of handling certificate rollover are known to work well, in combination with automated monitoring to ensure that the TLSA records and certificates are always current and correct.
@@ -188,7 +193,7 @@ Two ways of handling certificate rollover are known to work well, in combination
 * Make sure that your servers support TLS 1.2, and offer STARTTLS to all clients, even those that have not sent you email in the past. Denying STARTTLS to clients with no IP "reputation" would lock them out indefinitely if they support DANE, since they then can never send any initial mail in the clear to establish their reputation.
 
 # Tips, tricks and notices for implementation
-This section describes several pionts for attention when implementing DANE for SMTP. 
+This section describes several points for attention when implementing DANE for SMTP. 
 
 * DANE is meant to be used for the MX domain. So if you are using another domain's mail servers, make sure to ask the administrator of that domain (your mail provider) to support DANE by setting up a TLSA record.
 * When implementing DANE we advise to first publish DANE records on your MX domains, and then enable DANE verification on your sending mail servers.
@@ -202,24 +207,26 @@ This section describes several pionts for attention when implementing DANE for S
   * See also this [example of Let's Encrypt](https://mail.sys4.de/pipermail/dane-users/2019-December/000545.html). In this case the issuer certificate was changed, but the public key was not. As a result a "2 1 1" roll-over record would still validate, but a "2 0 1" roll-over record would not and requires an update. 
 * An issuer certificate (usage type "2") validates only when the full certificate chain is offered by the receiving mail server. 
 * Mail servers by default don't validate certificates and therefore don't have their own certificate store. That's why DANE for SMTP only supports usage type "2" (DANE-TA) and usage type "3" (DANE-EE). Usage type "0" (PKIX-TA) and usage type "1" (PKIX-EE) are not supported. 
+* When using 2 x x TLSA records, you should be aware when and how your CA replaces intermediate certificates. For some CA's, it might be advisable to include a 2 x x record for all intermediates, if you have no control over which intermediate certificate is used.
 * Make sure the TTL (time-to-live) of your TLSA records is not too high. This makes it possible to apply changes relatively fast in case of problems. A TTL between 30 minutes (1800) and 1 hour (3600) is recommended.
 * The refresh value of your full DNS zone should be in accordance with the TTL setting of your TLSA record, to make sure all name servers give the same information when (after expiration of the TLSA TTL) being queried.
 * In case of roll-over scheme "current + issuer", the use of the root certificate is preferred because in some contexts ([PKIoverheid](https://en.wikipedia.org/wiki/PKIoverheid)) this makes it easier to switch supplier / certificate without impacting DANE. (Remember [DigiNotar](https://en.wikipedia.org/wiki/DigiNotar)). 
 * Roll-over scheme "current + next" gives less flexibility but the highest form of certainty, because of "tight pinning".
 * Implement monitoring of your DANE records to be able to detect problems as soon as possible. 
 * Make sure your implementation supports the usage of a CNAME in your MX record. There are some inconsistencies between multiple RFCs. According to [RFC 2181](https://tools.ietf.org/html/rfc2181#section-10.3) a CNAME in MX records is not allowed, while [RFC 7671](https://tools.ietf.org/html/rfc7671#section-7) and [RFC 5321](https://tools.ietf.org/html/rfc5321#section-5.1) imply that the usage of a CNAME in MX records is allowed.
-* Using Server Name Indication (SNI) in an e-mail environment (for matching the certificate offered by a recieving e-mail server) is only usefull when DANE and DNSSEC are used. DNSSEC to perform a reliable MX lookup and DANE to verify the authenticity of the certificate. Sending e-mail servers (the TLS client) usually don't use SNI, because some receiving e-mail servers (the TLS server) cannot handle this; in some cases the setting up of a TLS connection fails. For more information see [RFC 7672 section 8.1](https://tools.ietf.org/html/rfc7672#section-8.1) and [this blogpost by Filippo Valsorda](https://blog.filippo.io/the-sad-state-of-smtp-encryption/). 
+* Using Server Name Indication (SNI) in an e-mail environment (for matching the certificate offered by a receiving e-mail server) is only useful when DANE and DNSSEC are used. DNSSEC to perform a reliable MX lookup and DANE to verify the authenticity of the certificate. Sending e-mail servers (the TLS client) usually don't use SNI, because some receiving e-mail servers (the TLS server) cannot handle this; in some cases the setting up of a TLS connection fails. For more information see [RFC 7672 section 8.1](https://tools.ietf.org/html/rfc7672#section-8.1) and [this blog post by Filippo Valsorda](https://blog.filippo.io/the-sad-state-of-smtp-encryption/). 
 * Make sure you keep an eye on the logs of your sending mail server to see what domains fail DANE verification.
 * Some software allows for a test mode. This means that DANE verification is done and logged but there’s no consequence for delivery if DANE verification fails.
 * Manually verify a mail server's certificate with the following commands:
   * get the DANE record: `dig tlsa _25._tcp.mail.example.nl`
   * verify certificate against TLSA record `openssl s_client -starttls smtp -connect mail.example.nl:25 -dane_tlsa_domain "mail.example.nl" -dane_tlsa_rrdata "3 1 1 29c8601cb562d00aa7190003b5c17e61a93dcbed3f61fd2f86bd35fbb461d084"`.
-* Check if DANE TLSA records (_25._tcp.mail.example.nl) are properly DNSSEC signed. A regularly occuring mistake is the presence of "proof of non-existence" (NSEC3) for the ancestor domain (_tcp.mail.example.nl). If this happens then resolvers that use qname minimization (like the resolver used by [Internet.nl](https://internet.nl)) think that _25._tcp.mail.example.nl does not exist since _tcp.mail.example.nl does not exists. Therefore the resolver can't get the TLSA record which makes DANE fail. 
+* Check if DANE TLSA records (_25._tcp.mail.example.nl) are properly DNSSEC signed. A regularly occurring mistake is the presence of "proof of non-existence" (NSEC3) for the ancestor domain (_tcp.mail.example.nl). If this happens then resolvers that use QNAME minimization (like the resolver used by [Internet.nl](https://internet.nl)) think that _25._tcp.mail.example.nl does not exist since _tcp.mail.example.nl does not exists. Therefore the resolver can't get the TLSA record which makes DANE fail. 
   * Check your DNSSEC implementation on [DNSViz](https://dnsviz.net/). Enter "_25._tcp.mail.example.nl".
   * You can also manually check for this error. `dig _25._tcp.mail.example.nl tlsa +dnssec` results in a NOERROR response, while `dig _tcp.mail.example.nl tlsa +dnssec` results in a NXDOMAIN response. 
+* You can set up SMTP TLS Reporting (TLSRPT, see [RFC 8460](https://www.rfc-editor.org/info/rfc8460/) to receive reports concerning TLS connections. These reports may help you to debug issues concerning DANE and TLS.
 
 # Inbound e-mail traffic (publishing DANE DNS records)
-This part of the how-to describes the steps that should be taken with regard to your inbound e-mail traffic, which primairily involves publishing DANE DNS records. This enables other parties to use DANE for validating the certificates offered by your e-mail servers. 
+This part of the how-to describes the steps that should be taken with regard to your inbound e-mail traffic, which primarily involves publishing DANE DNS records. This enables other parties to use DANE for validating the certificates offered by your e-mail servers. 
 
 ## Generating DANE records
 **Primary mail server (mail1.example.nl)**
@@ -319,11 +326,11 @@ This setting tells Postfix to perform DNS lookups using DNSSEC. This is an impor
 
 `smtp_tls_security_level = dane`  
 
-By default Postfix uses opportunistic TLS (smtp_tls_security_level = may) which is susceptible to man in the middle attacks. You could tell Postfix to use mandatory TLS (smtp_tls_security_level = encrypt) but this breaks backwards compatibility with mail servers that don't support TLS (and only work with plaintext delivery). However, when Postfix is configured to use the "dane" security level (smtp_tls_security_level = dane) it becomes resistant to man in the middle attacks, since Postfix will connect to other mail servers using "mandatory TLS" when TLSA records are found. This means that: 
-* If TLSA records are found but are unusable, Postfix will NOT fallback to opportunistic TLS (STARTTLS) or ultimately plaintext delivery. 
-* If no TLSA records are found (and thus DANE is not supported), Postfix will fallback to opportunistic TLS (STARTTLS) or ultimality plaintext delivery.
+By default Postfix uses opportunistic TLS (smtp_tls_security_level = may) which is susceptible to man in the middle attacks. You could tell Postfix to use mandatory TLS (smtp_tls_security_level = encrypt) but this breaks backwards compatibility with mail servers that don't support TLS (and only work with plain text delivery). However, when Postfix is configured to use the "dane" security level (smtp_tls_security_level = dane) it becomes resistant to man in the middle attacks, since Postfix will connect to other mail servers using "mandatory TLS" when TLSA records are found. This means that: 
+* If TLSA records are found but are unusable, Postfix will NOT fallback to opportunistic TLS (STARTTLS) or ultimately plain text delivery. 
+* If no TLSA records are found (and thus DANE is not supported), Postfix will fallback to opportunistic TLS (STARTTLS) or ultimately plain text delivery.
 
-To enforce DANE you can use "smtp_tls_security_level = dane-only" (aka mandatory DANE). With this setting a sending mail server makes sure there is no fallback to opportunistic TLS (STARTTLS) or plaintext when either the TLSA records are unusable or absent. It is possible to use mandatory DANE on a per domain basis. For example when you know a certain domain should support DANE and you want to be absolutely sure that a secure and validated delivery is used and want to prevent fallbacks to a less secure delivery method. 
+To enforce DANE you can use "smtp_tls_security_level = dane-only" (aka mandatory DANE). With this setting a sending mail server makes sure there is no fallback to opportunistic TLS (STARTTLS) or plain text when either the TLSA records are unusable or absent. It is possible to use mandatory DANE on a per domain basis. For example when you know a certain domain should support DANE and you want to be absolutely sure that a secure and validated delivery is used and want to prevent fallbacks to a less secure delivery method. 
 
 `smtp_host_lookup = dns`  
 
@@ -547,6 +554,78 @@ tls: cert: /C=NL/ST=Zuid-Holland/L=Den Haag/XXXXXXX; issuer=/C=NL/O=XXXXXXX; ver
 tls: DANE match: /C=NL/ST=Zuid-Holland/L=XXXXXX; issuer=XXXXX; depth=0
 ```
 
+# Implementing DANE for SMTP on Stalwart SMTP (outbound e-mail traffic)
+
+Stalwart SMTP includes built-in support for strong transport security mechanisms such as DANE, MTA-STS (Mail Transfer Agent Strict Transport Security) and SMTP TLS Reporting.
+
+**Specifics for this setup**
+* Stalwart SMTP v0.1 (or greater)
+
+**Assumptions**
+* Basic configuration of Stalwart SMTP
+
+## Outbound
+
+DANE can be enabled in Stalwart SMTP with the `queue.outbound.tls.dane` property which accepts the following values:
+
+- `optional`: Use DANE only if TLSA records for the domain are available.
+- `require`: Require DANE and do not perform delivery unless a valid TLSA record is available (not recommended unless used under a custom rule).
+- `disable`: Never use DANE.
+
+Example:
+
+```
+[queue.outbound.tls]
+dane = "optional"
+```
+
+## DANE TLS Reporting
+
+SMTP TLS Reporting is a mechanism for reporting on the certificate and DANE validation outcomes performed by a mail transfer agent (MTA), such as Stalwart SMTP. It allows the recipient of an email to receive reports on DANE policies and the validity of the certificate used to secure the transport of the email, including information such as whether the certificate was valid, expired, or revoked.
+
+### Outbound reports
+
+Stalwart SMTP can generate TLS aggregate reports to inform other hosts about the results of DANE validation. Outgoing TLS reports are configured under the `report.tls.aggregate` key using the following options:
+
+- `from-name`: The name that will be used in the `From` header of the TLS report email.
+- `from-address`: The email address that will be used in the `From` header of the TLS report email.
+- `org-name`: The name of the organization to be included in the report.
+- `send`: The frequency at which the TLS reports will be sent. The options are `hourly`, `daily`, `weekly`, or `never` to disable reporting.
+- `max-size`: The maximum size of the TLS report in bytes.
+- `sign`: The list of DKIM signatures to use when signing the TLS report. 
+
+Example:
+
+```
+[report.tls.aggregate]
+from-name = "TLS Report"
+from-address = "noreply-tls@foobar.org"
+org-name = "The Foobar Organization"
+contact-info = "jane@foobar.org"
+send = "daily"
+max-size = 26214400 # 25 mb
+sign = ["rsa"]
+```
+
+### Inbound report analysis
+
+Stalwart SMTP has the ability to automatically analyze incoming TLS reports including DANE authentication results that are sent by other domains, which eliminates the need for manual intervention and saves time and effort for the system administrator. In case any DANE authentication issues are found, an event is recorded in the log file or sent to OpenTelemetry. By turning reports into actionable events, system administrators can quickly detect and respond to configuration errors and any instances of abuse, such as spam or phishing, which helps to maintain the integrity of the email system.
+
+The configuration for report analysis can be found under the `report.analysis` key and includes the following attributes:
+
+- `addresses`: A list of addresses (which may include wildcards) from which reports will be intercepted and analyzed.
+- `forward`: Whether reports should be forwarded to their final recipient after analysis.
+- `store`: The location where incoming reports will be stored. If no path is specified, the reports will not be stored.
+
+Example:
+
+```
+[report.analysis]
+addresses = ["dmarc@*", "abuse@*"]
+forward = true
+store = "/usr/local/stalwart-smtp/incoming"
+```
+
 # Special thanks
 Our infinite gratitude goes out to the following people for their support in building this how-to for DANE.
 
@@ -555,6 +634,7 @@ Alwin de Bruin
 Anders Berggren  
 Marc van de Geijn  
 Mark Scholten  
+[mdecimus](https://github.com/mdecimus)  
 Patrick Koetter  
 Simon Besteman  
 Tom van Leeuwen  

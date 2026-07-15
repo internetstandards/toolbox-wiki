@@ -1,13 +1,13 @@
 <img align="right" src="images/logo-internetnl-en.svg">
 
 # SPF how-to
-This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing SPF.  
+This how-to is created by the Dutch Internet Standards Platform (the organization behind [internet.nl](https://internet.nl)) and is meant to provide practical information and guidance on implementing SPF.
 
 # Table of contents
-- [What is SPF?](#what-is-spf-)
-- [Why use SPF?](#why-use-spf-)
-- [Tips, tricks and notices for implementation](#tips--tricks-and-notices-for-implementation)
-- [Outbound e-mail traffic (DNS records)](#outbound-e-mail-traffic--dns-records-)
+- [What is SPF?](#what-is-spf)
+- [Why use SPF?](#why-use-spf)
+- [Tips, tricks and notices for implementation](#tips-tricks-and-notices-for-implementation)
+- [Outbound e-mail traffic (DNS records)](#outbound-e-mail-traffic--dns-records)
 - [Inbound e-mail traffic](#inbound-e-mail-traffic)
   * [Implementing SPF in Postfix with SpamAssassin](#implementing-spf-in-postfix-with-spamassassin)
     + [Configuring Postfix](#configuring-postfix)
@@ -19,22 +19,22 @@ This how-to is created by the Dutch Internet Standards Platform (the organizatio
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
 # What is SPF?
-SPF is short for "**S**ender **P**olicy **F**ramework" and is described in [RFC 7208](https://tools.ietf.org/html/rfc7208). It offers domain owners that use their domains for sending e-mail, the possibility to use the DNSSEC infrastructure to publish which hosts (mail servers) are authorized to use their domain names in the "MAIL FROM" and "HELO" identities. So basically SPF is a whitelist which lists all servers that are allowed to send e-mail on behalf of a specific domain. The receiving mail server may use the information (a SPF record) published in the DNS zone of a specific mail sending domain. 
+SPF is short for "**S**ender **P**olicy **F**ramework" and is described in [RFC 7208](https://tools.ietf.org/html/rfc7208). It offers domain owners that use their domains for sending e-mail, the possibility to use the DNS infrastructure to publish which hosts (mail servers) are authorized to use their domain names in the "MAIL FROM" and "HELO" identities. So basically SPF is an allowlist which lists all servers that are allowed to send e-mail on behalf of a specific domain. The receiving mail server may use the information (a SPF record) published in the DNS zone of a specific mail sending domain.
 
 # Why use SPF?
-Our current e-mail infrastructure was originally designed for any mail sending host to use any DNS domain name it wants. The authenticity of the sending mail server cannot be deterimined, which makes it easy for random third parties to make use of a domain name with possibly a malicious intent. This increases the risk of processing e-mail since the intentions of the sender (host) are uncertain. SPF can help the fight against spam and other kinds of unwanted e-mail be offering a way of authenticating the sending mail server.  
+Our current e-mail infrastructure was originally designed for any mail sending host to use any DNS domain name it wants. The authenticity of the sending mail server cannot be determined, which makes it easy for random third parties to make use of a domain name with possibly a malicious intent. This increases the risk of processing e-mail since the intentions of the sender (host) are uncertain. SPF can help the fight against spam and other kinds of unwanted e-mail be offering a way of authenticating the sending mail server.
 
 # Tips, tricks and notices for implementation
-* The sender address shown to the user ("RFC5322.From") is not used when authenticating. SPF uses the invisible "RFC5321.MailFrom" header. Combining SPF with DMARC removes this disadvantage. 
+* The sender address shown to the user ("RFC5322.From") is not used when authenticating. SPF uses the invisible "RFC5321.MailFrom" header. Combining SPF with DMARC removes this disadvantage.
 * E-mail forwarding is not supported, since the e-mail is often forwarded by another e-mail server.
 * SPF does not work between domains that use the same e-mail server.
-* Parked domains should be explicitly configured to not use e-mail. For SPF this is done with an empty policy (not mentioning any ip-adresses or hostnames which are allowed to send mail) and a hard fail: "v=spf1 –all".
-* When processing incoming mail we advise to favor a DMARC policy over an SPF policy. Do not configure SPF rejection to go into effect early in handling, but take full advantage of the enhancements DMARC is offering. A message might still pass based on DKIM.
-  * At the same time, be aware that some operaters still allow a hard fail (-all) to go into effect early in handling and skip DMARC operations. 
+* Parked domains should be explicitly configured to not use e-mail. See the [Parked domain how-to](https://github.com/internetstandards/toolbox-wiki/blob/main/parked-domain-how-to.md).
+* When processing incoming mail we advise to favor evaluating the DMARC policy before the SPF policy. Do not configure SPF rejection to go into effect early in handling, but take full advantage of the enhancements DMARC is offering. A message might still pass based on DKIM, even when SPF fails.
+  * At the same time, be aware that some operators still make a hard fail (-all) to go into effect early in handling and skip DMARC operations. 
 * As stated in [section 5.2 of the RFC](https://tools.ietf.org/html/rfc7208#section-5.2) the _include_ mechanism is not applicable to the _all_ mechanism within the referenced record. This means that an SPF record's default policy is not 'inherited' upon inclusion. When including one or more SPF records from other domains, a default policy (~all or -all) is still required. For fully 'inheriting' another domain's SPF record, consider using the [_redirect_ modifier](https://tools.ietf.org/html/rfc7208#section-6.1).
 
 # Outbound e-mail traffic (DNS records)
-SPF for outbound e-mail traffic is limited to publishing an SPF policy as a TXT-record in a domain name's DNS zone. This enables other parties to use SPF for validating the authenticity of e-mail servers sending e-mail on behalf of your domain name. 
+SPF for outbound e-mail traffic is limited to publishing an SPF policy as a TXT-record in a domain name's DNS zone. This enables other parties to use SPF for validating the authenticity of e-mail servers sending e-mail on behalf of your domain name.
 
 The example below shows an SPF record with a **hard fail**.
 > v=spf1 mx ip4:192.168.1.1/32 ip6:fd12:3456:789a:1::/64 a:mail.example.com a:mail2.example.com -all"
@@ -44,7 +44,7 @@ Although a soft fail (~all) is recommended in order to prevent false positives, 
 # Inbound e-mail traffic 
 Ideally incoming e-mail is processed by making a **single decision** based on a collective evaluation of all relevant e-mail standards (SPF, DKIM, DMARC). Although this would be the most elegant way of processing incoming e-mail, most e-mail servers process e-mail standards in a sequential order. This should be taken into consideration when configuring your own e-mail environment; depending on a domain owner's preferences it is also possible to implement a "single decision" e-mail environment.
 
-Thereafter, it is [stated in the DMARC RFC](https://tools.ietf.org/html/rfc7489#section-10.1) that some receiver architectures might implement SPF in advance of any DMARC operations. This means that a "-" prefix on a sender's SPF mechanism, such as "-all", could cause that rejection to go into effect early in handling, causing message rejection before any DMARC processing takes place. While operators choosing to use "-all" should be aware of this, we advise to favor a DMARC policy over an SPF policy. As also [stated in the DMARC RFC](https://tools.ietf.org/html/rfc7489#section-6.7), the final diposition of a message is always a matter of local policy. With this in mind we feel that operators should not configure SPF rejection to go into effect early in handling, and thus disregarding DMARC. At the cost of processing the entire message body, we advise to always evaluate all relevant standards before coming to a decision. If SPF fails, DKIM might still pass resulting in a satisfying DMARC evaluation. 
+Thereafter, it is [stated in the DMARC RFC](https://tools.ietf.org/html/rfc7489#section-10.1) that some receiver architectures might implement SPF in advance of any DMARC operations. This means that a "-" prefix on a sender's SPF mechanism, such as "-all", could cause that rejection to go into effect early in handling, causing message rejection before any DMARC processing takes place. While operators choosing to use "-all" should be aware of this, we advise to favor a DMARC policy over an SPF policy. As also [stated in the DMARC RFC](https://tools.ietf.org/html/rfc7489#section-6.7), the final disposition of a message is always a matter of local policy. With this in mind we feel that operators should not configure SPF rejection to go into effect early in handling, and thus disregarding DMARC. At the cost of processing the entire message body, we advise to always evaluate all relevant standards before coming to a decision. If SPF fails, DKIM might still pass resulting in a satisfying DMARC evaluation. 
 
 ## Implementing SPF in Postfix with SpamAssassin
 **Specifics for this setup**

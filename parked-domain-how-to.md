@@ -21,18 +21,18 @@ This how-to is created by the Dutch Internet Standards Platform (the organizatio
 If a domain is not using e-mail it is recommended to use the following settings.
 
 ## Null MX
-Explicitly configure an 'empty' MX record according to [RFC7505 ](https://tools.ietf.org/html/rfc7505). 
+Explicitly configure an 'empty' MX record according to [RFC 7505](https://tools.ietf.org/html/rfc7505). This indicates you do not accept any inbound e-mail. Note that some MTA's also block outgoing e-mail when no mailserver/a Null MX is specified.
 
 `example.nl. IN MX 0 .`
 
 ## DMARC
 Set DMARC policy to reject mails, but allow reporting to take place. This helps detecting activity related to your domain.
 
-`_dmarc.example.nl. IN TXT "v=DMARC1; p=reject; rua=mailto:rua@example.nl; ruf=mailto:ruf@example.nl"`
+`_dmarc.example.nl. IN TXT "v=DMARC1; p=reject; psd=n; rua=mailto:rua@example.nl"`
 
-If the domain itself does not receive email (such as when the domain has been configured with NULL MX), then the RUA and RUF must point to another domain that does receive emails, such as:
+If the domain itself does not receive email (such as when the domain has been configured with Null MX), then the RUA must point to another domain that does receive emails, such as:
 
-`_dmarc.example.nl. TXT "v=DMARC1; p=reject; rua=mailto:rua@example.net; ruf=mailto:ruf@example.net"`
+`_dmarc.example.nl. TXT "v=DMARC1; p=reject; psd=n; rua=mailto:rua@example.net"`
 
 On the other domain (that does receive e-mail), add an authorization record for the parked domain:
 
@@ -44,10 +44,17 @@ When using a wildcard selector to set an empty public key, you indicate that all
 `*._domainkey.example.nl. IN TXT "v=DKIM1; p="`
 
 ## SPF
-Set an an empty policy (not mentioning any ip-adresses or hostnames which are allowed to send mail) and a hard fail.
+Set an an empty policy (not mentioning any IP addresses or hostnames which are allowed to send mail) and a hard fail. This record should also be added for any specified subdomain (e.g., the www subdomain).
 
 `example.nl. IN TXT "v=spf1 -all"`
- 
+
+You can add a wildcard record to protect all non-existing subdomains with SPF. For full protection, you should also add this for subdomains _under_ a specific subdomain (e.g., add it for *.www if www exists).
+
+`*.example.nl TXT "v=spf1 -all"`
+
+## DNSSEC
+Using DNSSEC guarantees that the above DNS records are coming from the correct source.
+
 # Domain without a website
 Apply the following settings to domains not using a website.
 

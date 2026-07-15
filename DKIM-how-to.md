@@ -32,7 +32,7 @@ DKIM stands for **D**omain**K**eys **I**dentified **M**ail and is described in [
 A common used technique used by spammers is to trick the receiving party into believing an e-mail is legitimate by using a forged sender address. This is also known as e-mail spoofing. DKIM has been designed to protect against spoofing. If an incoming e-mail does not have a DKIM signature or when it's DKIM signature does not validate, the receiving e-mail server should consider the e-mail to be SPAM.
 
 # Tips, tricks and notices for implementation
-* Use a DKIM key (RSA) of [at least 1024 bits](https://tools.ietf.org/html/rfc6376#section-3.3.3) to minimize the successrate of offline attacks. Don't go beyond a key size of 2048 bits since this is not mandatory according to the RFC.
+* Use a DKIM key (RSA) of [at least 1024 bits](https://tools.ietf.org/html/rfc6376#section-3.3.3) to minimize the success rate of offline attacks. Don't go beyond a key size of 2048 bits since this is not mandatory according to the RFC.
 * Make sure to change your DKIM keys regularly. A rotation scheme of 6 months is recommended.
 * If a domain is not using e-mail (anymore), it is recommended to set an empty public key: "v=DKIM1; p=". 
   * When used with a specific selector, an empty public key means that e-mail signed with the associated public key must be considered unreliable since they public key was revoked. 
@@ -47,7 +47,7 @@ DKIM software allows you to specify the canonicalization settings. The settings 
 We currently advise against the "simple/simple" canonicalization setting because this (being the most strict setting) tolerates almost no modification of the header and body before signing, which is prone to cause problems when forwarding mail. This is confirmed in RFC 7960 [section 2.3](https://tools.ietf.org/html/rfc7960#section-2.3) and [section 4.1.1.2](https://tools.ietf.org/html/rfc7960#section-4.1.1.2). Therefore we recommend to use the "relaxed/relaxed" setting which tolerates common modifications of the header and body before signing. 
 
 Notice: 
-* When not specified DKIM canoncalization defaults to "strict/strict". 
+* When not specified DKIM canonicalization defaults to "strict/strict". 
 * "c=strict" equals "c=strict/strict", but "c=relaxed" equals "relaxed/strict". 
 
 # Implementing DKIM with OpenDKIM for Postfix with SpamAssassin
@@ -90,15 +90,15 @@ Create the the file **/etc/opendkim/trusted_hosts** and make sure it contains th
     example.nl
     mail.example.nl
 
-Now create the directory **/etc/opendkim/keys/example.nl** and execute the following command with this directory and make sure to replace 'YYYYMM' with the number of the current year and month. For example: "selector201906". This makes it easier to determine the age of a specific key in a later stage. 
+Now create the directory **/etc/opendkim/keys/example.nl** and execute the following command with this directory and make sure to replace 'YYYYMM' with the number of the current year and month. For example: "selector202606". This makes it easier to determine the age of a specific key in a later stage. 
 
 `opendkim-genkey -s selectorYYYYMM -d example.nl`
 
 There are now 2 files in **/etc/opendkim/keys/example.nl** (the key pair): 
-* selector201906.txt: this file contains DNS complete DKIM DNS record including the public key.
-> selector201906._domainkey IN TXT "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCooJQftNOg3wOqVW5wOpr1PhhzgeP1IE9dTOtpUOCENP+z1HwP+8fFp9aGo/EKHoDQRhDUxXlVfocmRjb0lyjHD5ax16BBKLAd8+AgHZt1er8fmm2cL+7nurv0vU5YBG9LGUklD9qO/zJrIz+Lp+YO7D2rt0qYAgGzUOLJBWLBNQIDAQAB"  ; ----- DKIM key selector201906 for example.nl
+* selector202606.txt: this file contains DNS complete DKIM DNS record including the public key.
+> selector202606._domainkey IN TXT "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCooJQftNOg3wOqVW5wOpr1PhhzgeP1IE9dTOtpUOCENP+z1HwP+8fFp9aGo/EKHoDQRhDUxXlVfocmRjb0lyjHD5ax16BBKLAd8+AgHZt1er8fmm2cL+7nurv0vU5YBG9LGUklD9qO/zJrIz+Lp+YO7D2rt0qYAgGzUOLJBWLBNQIDAQAB"  ; ----- DKIM key selector202606 for example.nl
 
-* selector201906.private: this file contains the private key which is going to be used by Postfix to sign all outbound e-mails.
+* selector202606.private: this file contains the private key which is going to be used by Postfix to sign all outbound e-mails.
 
 > -----BEGIN RSA PRIVATE KEY-----  
 > MIICXAIBAAKBgQCooJQftNOg3wOqVW5wOpr1PhhzgeP1IE9dTOtpUOCENP+z1HwP  
@@ -118,15 +118,15 @@ There are now 2 files in **/etc/opendkim/keys/example.nl** (the key pair):
 
 Now make sure that the private key can only be read by the user opendkim by executing the following command:
 
-`chown opendkim:opendkim selector201906.private`
+`chown opendkim:opendkim selector202606.private`
 
 The next step is to create the key table file **/etc/opendkim/key_table**. This file will tell opendkim about the domains that have been configured and where to find their keys. Add the following to configure example.nl:
 
-> selector201906._domainkey.example.nl example.nl:selector201906:/etc/opendkim/keys/example.nl/selector201906.private
+> selector202606._domainkey.example.nl example.nl:selector202606:/etc/opendkim/keys/example.nl/selector202606.private
 
 Create the file **/etc/opendkim/signing_table** and add the following line:
 
-> *@example.nl selector201906._domainkey.example.nl
+> *@example.nl selector202606._domainkey.example.nl
 
 Start OpenDKIM and check your logfiles for possible errors.
 
@@ -136,7 +136,7 @@ OpenDKIM does not support the automated rotation of DKIM keys. This means that y
 ### Publish the DNS record
 
 Make sure to add the following lines to you domain's zone file:
-> selector201906._domainkey IN TXT "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCooJQftNOg3wOqVW5wOpr1PhhzgeP1IE9dTOtpUOCENP+z1HwP+8fFp9aGo/EKHoDQRhDUxXlVfocmRjb0lyjHD5ax16BBKLAd8+AgHZt1er8fmm2cL+7nurv0vU5YBG9LGUklD9qO/zJrIz+Lp+YO7D2rt0qYAgGzUOLJBWLBNQIDAQAB"
+> selector202606._domainkey IN TXT "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCooJQftNOg3wOqVW5wOpr1PhhzgeP1IE9dTOtpUOCENP+z1HwP+8fFp9aGo/EKHoDQRhDUxXlVfocmRjb0lyjHD5ax16BBKLAd8+AgHZt1er8fmm2cL+7nurv0vU5YBG9LGUklD9qO/zJrIz+Lp+YO7D2rt0qYAgGzUOLJBWLBNQIDAQAB"
 
 > _adsp._domainkey IN TXT "dkim=all"
 
@@ -150,7 +150,7 @@ The final step is to configure Postfix to actually sign outbound e-mail using Op
     smtpd_milters = inet:localhost:12301
     non_smtpd_milters = inet:localhost:12301
 
-When you are ready to start using DKIM restart Postfix, but make sure you waited long enough for the DKIM DNS record to succesfully propagate.
+When you are ready to start using DKIM restart Postfix, but make sure you waited long enough for the DKIM DNS record to successfully propagate.
 
 ## Inbound e-mail
 
@@ -172,7 +172,7 @@ score DKIM_ADSP_NXDOMAIN 5.0
 # No valid author signature and from-domain does not exist 
 ```
 
-This means that incoming e-mail is instantly classificied as spam if there is not a valid DKIM signature in the mail header and:
+This means that incoming e-mail is instantly classified as spam if there is not a valid DKIM signature in the mail header and:
 * the sending domain's DKIM ADSP record states that all e-mail should be signed and all unsigned mails should be discarded (DISCARD).
 * the sending domain's DKIM ADSP record states that all e-mail should be signed (ALL). 
 * the domain used in the "From"-header (a.k.a. RFC5322.From, Header From, Message From) does not exist. 
@@ -216,16 +216,16 @@ Navigate to `Configuration -> Code editor` select there the End of Data (EOD/EOD
 Before the `GetMailMessage()->queue()` add:
 
 ```php
-$dkimselector = "selector201909"; // Selector
+$dkimselector = "selector202609"; // Selector
 $dkimdomain = "example.nl"; // Header From: 
-$dkimcertificate = "selector201909"; // certificate ID
+$dkimcertificate = "selector202609"; // certificate ID
 if (GetMailMessage()->signDKIM($dkimselector,$dkimdomain,"pki:".$dkimcertificate) == none)
     Defer("DKIM signing error, bla bla error message");
 ```
 
 The following syslog message is visible in the logging if DKIM signing is successful.
 ```
-[6xxxxxxb-dxxf-1xx9-bxx5-0xxxxxxxxx4] [EOD] DKIM signed for example.nl (selector201909) with signature b=Yxxxxx9
+[6xxxxxxb-dxxf-1xx9-bxx5-0xxxxxxxxx4] [EOD] DKIM signed for example.nl (selector202609) with signature b=Yxxxxx9
 ``` 
 
 ## Inbound email
@@ -251,7 +251,7 @@ on success:
 
 on error, selector not found in DNS: 
 [2xxxxxxc-dxx2-1xx9-axxv-xxxxxxxxxxxa] [EOD] Processing (dkimverify)
-[2xxxxxxc-dxx2-1xx9-axxv-xxxxxxxxxxxa] [EOD] DKIM(example.nl): Permanent error: No key for signature selector201909._domainkey.example.nl
+[2xxxxxxc-dxx2-1xx9-axxv-xxxxxxxxxxxa] [EOD] DKIM(example.nl): Permanent error: No key for signature selector202609._domainkey.example.nl
 
 on error, Mailbody has been manipulated:
 [2xxxxxxc-dxx2-1xx9-axxv-xxxxxxxxxxxa] [EOD] Processing (dkimverify)
